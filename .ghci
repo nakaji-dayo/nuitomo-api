@@ -1,0 +1,5 @@
+:set prompt "> "
+
+import Data.Default.Class
+import Data.Function
+import Control.Lens

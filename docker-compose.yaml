@@ -1,0 +1,44 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:10.3
+    environment:
+      POSTGRES_USER: api
+      POSTGRES_PASSWORD: passwd
+      POSTGRES_DB: nuitomo-api
+    volumes:
+      - ./dev-data/postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    command: -c fsync=off
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:5.6.12
+  #   ports:
+  #     - 9200-9300:9200-9300
+  #   volumes:
+  #     - ./dev-data/elasticsearch:/usr/share/elasticsearch/data
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 1G
+  #   environment:
+  #     - ES_JAVA_OPTS=-Xms1g  -Xmx1g
+  #     - xpack.graph.enabled=false
+  #     - xpack.ml.enabled=false
+  #     - xpack.monitoring.enabled=false
+  #     - xpack.security.enabled=false
+  #     - xpack.watcher.enabled=false
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:5.6.12
+  #   ports:
+  #     - 3081:5601
+  #   links:
+  #     - elasticsearch
+  #   environment:
+  #     - xpack.graph.enabled=false
+  #     - xpack.ml.enabled=false
+  #     - xpack.monitoring.enabled=false
+  #     - xpack.reporting.enabled=false
+  #     - xpack.security.enabled=false
+  #     - xpack.monitoring.report_stats=false
+  #     - xpack.monitoring.ui.enabled=false
