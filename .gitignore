@@ -1,0 +1,12 @@
+.stack-work/
+dev-data
+report.html
+src/Entity/*
+src/Entity.hs
+nuitomo-api.cabal
+.dir-locals.el
+dist
+setenv.sh
+docker
+nuitomo-api.hsfiles
+nuitomo-api.hsfiles-tmp

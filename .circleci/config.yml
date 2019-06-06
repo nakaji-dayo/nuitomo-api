@@ -1,0 +1,54 @@
+version: 2.0
+jobs:
+  build:
+    docker:
+      - image: lemois/haskell:8.6.5
+      - image: &postgres_image circleci/postgres:10.3-alpine
+        environment:
+          POSTGRES_USER: api
+          POSTGRES_PASSWORD: passwd
+          POSTGRES_DB: nuitomo-api
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            #
+            - stack-v1-{{ checksum "package.yaml" }}-{{ checksum "stack.yaml" }}
+            - stack-v1-{{ checksum "package.yaml" }}
+            - stack-v1
+            #
+
+      - restore_cache:
+          keys:
+            #
+            - work-v1-{{ checksum "package.yaml" }}-{{ checksum "stack.yaml" }}
+            - work-v1-{{ checksum "package.yaml" }}
+            - work-v1
+            #
+
+      - run: stack install hlint
+
+      - run: make migrate-up
+      - run: make lint
+      - run: make build-all
+      - run: make test
+
+      - run: stack exec -- nuitomo-api-swagger > ~/swager.json
+
+      - save_cache:
+          #
+          key: stack-v1-{{ checksum "package.yaml" }}-{{ checksum "stack.yaml" }}
+          #
+          paths:
+          - ~/.stack/
+
+      - save_cache:
+          #
+          key: work-v1-{{ checksum "package.yaml" }}-{{ checksum "stack.yaml" }}-{{ epoch }}
+          #
+          paths:
+          - ./.stack-work/
+
+      - store_artifacts:
+          path: ~/swager.json
