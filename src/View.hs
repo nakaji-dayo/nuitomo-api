@@ -14,19 +14,27 @@ import           Entity
 import           Service.Loader
 import           Type
 import           View.Base
--- import           View.Helper
+import           View.Helper
 
-renderTask :: ( IsMember "tags" TagsMap c
-              ) =>
-              Map c -> Task -> ViewM TaskResponse
-renderTask loaded t = do
-  ts <- getList (t ^. #id) (Var :: Var "tags") loaded
-  vTags <- mapM renderTag ts
-  return $ TaskResponse
+renderPost :: Post -> ViewM PostResponse
+renderPost t = do
+  -- ts <- getList (t ^. #id) (Var :: Var "tags") loaded
+  return $ PostResponse
       { id = t ^. #id
-      , name = t ^. #name
-      , tags = vTags
+      , body = t ^. #body
       }
 
-renderTag :: TaskTag -> ViewM String
-renderTag = pure . view #name
+renderUser :: (IsMember
+                "userImages" UserImageMap c
+              ) => Map c -> User -> ViewM UserResponse
+renderUser c x = do
+  is <- getList (x ^. #id) (Var :: Var "userImages") c
+  isV <-  mapM renderUserImage is
+  return $ UserResponse
+    { id = x ^. #id
+    , name = x ^. #name
+    , imagePaths = isV
+    }
+
+renderUserImage :: UserImage -> ViewM String
+renderUserImage x = return $ x ^. #path

@@ -39,9 +39,21 @@ $(deriveApiFieldSumType ''Gender 'Male)
 
 type Tag = String
 
-data TaskResponse = TaskResponse
+data PostResponse = PostResponse
   { id   :: ResourceId
-  , name :: String
-  , tags :: [String]
+  , body :: String
   } deriving (Show, Generic, Eq)
-$(deriveApiField ''TaskResponse)
+$(deriveApiField ''PostResponse)
+
+data UserResponse = UserResponse
+  { id         :: ResourceId
+  , name       :: String
+  , imagePaths :: [String]
+  } deriving (Show, Generic, Eq)
+$(deriveApiField ''UserResponse)
+
+data CreateUserRequest = CreateUserRequest
+ { name      :: String
+ , imagePath :: String
+ } deriving (Show, Generic, Eq)
+$(deriveApiField ''CreateUserRequest)

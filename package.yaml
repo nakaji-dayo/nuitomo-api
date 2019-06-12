@@ -62,6 +62,8 @@ library:
   - pretty-simple
   - http-types
   - servant-swagger-tags
+  - x509
+  - pem
 
 executables:
   nuitomo-api-api:

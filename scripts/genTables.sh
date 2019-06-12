@@ -16,6 +16,8 @@ echo "module Entity" > $entityImport
 
 tail='f'
 
+rm -f ./src/Entity/*
+
 psql -h localhost -d ${DB} -U api -Atc "select tablename from pg_tables where schemaname='public' order by tablename" | \
     while read entity; do
         model=`echo $entity | perl -pe "s/_(.)/\u\1/g; s/^(.)/\u\1/g"`
