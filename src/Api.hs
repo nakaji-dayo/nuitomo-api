@@ -14,15 +14,18 @@ import           App
 import           Auth
 import qualified Config
 import           Handler.Error
+import           Handler.Post
 import           Handler.System
-import           Handler.Task
+import           Handler.User
 import           Katip
 import           Network.Wai.Handler.Warp
 import           Network.Wai.Middleware.Cors
+import           Servant                     hiding (Context)
 import           Servant.Auth.Server
 import           Servant.Swagger.Tags
 import           Type
 
+import           Debug.Trace
 -- instance (HasServer (MultipartForm a b :> api) context, HasMock api context) => HasMock (MultipartForm a b :> api) context where
 --   mock _ ctx _ = mock (Proxy :: Proxy api) ctx
 
@@ -30,10 +33,15 @@ import           Type
 --   toSwagger Proxy = toSwagger $ Proxy @api
 
 type Protected =
-  Tags "Task" :> TaskAPI
+  Tags "Post" :> PostAPI
+  :<|> Tags "User" :> UserAPI
 
-type TaskAPI =
-  Summary "List tasks" :> "tasks" :> Get '[JSON] [TaskResponse]
+type PostAPI =
+  Summary "List posts" :> "posts" :> Get '[JSON] [PostResponse]
+
+type UserAPI =
+  Summary "List User" :> "users" :> Get '[JSON] [UserResponse]
+  :<|> Summary "Create User" :> "users" :> ReqBody '[JSON] CreateUserRequest :> Post '[JSON] ResourceId
 
 type UnProtected =
   Tags "System" :>
@@ -45,11 +53,15 @@ type API auths = Auth auths AuthUser :> Protected
 
 protected :: AuthResult AuthUser -> ServerT Protected AppM
 protected (Authenticated au) =
-  taskApi au
-protected _                  = throwAll err401
+  postApi au
+  :<|> userApi au
+protected x                  = trace (show x) $ throwAll err401
 
-taskApi :: AuthUser -> ServerT TaskAPI AppM
-taskApi = getTasksR
+postApi :: AuthUser -> ServerT PostAPI AppM
+postApi = getPostsR
+
+userApi :: AuthUser -> ServerT UserAPI AppM
+userApi au = getUsersR au :<|> postUsersR au
 
 unprotected :: ServerT UnProtected AppM
 unprotected =
@@ -88,4 +100,5 @@ serve :: IO ()
 serve = do
   (ctx, logEnv) <- initialize
   let jwtCfg = mkJwtCfg (Config.apiSecretKey $ config ctx)
-  run (Config.apiPort (config ctx)) (app ctx jwtCfg logEnv)
+  jwtCfg' <- getFirebaseAuthJwtSettings (signingKey jwtCfg)
+  run (Config.apiPort (config ctx)) (app ctx jwtCfg' logEnv)

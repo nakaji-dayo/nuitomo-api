@@ -38,7 +38,7 @@ import           Control.Monad.Reader
 import           Data.Int                    (Int64)
 import           Database.Relational.Type    as RT
 import           DataSource
-import           Servant                     hiding (Context, serve)
+import           Servant                     hiding (Context, Post, serve)
 
 -- DB
 import           Control.Monad.Trans.Control (MonadBaseControl)

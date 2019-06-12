@@ -8,28 +8,47 @@
 
 module Query where
 
-import           Data.Int
+-- import           Data.Int
 import           Database.Record.Persistable (PersistableWidth)
 import           Database.Relational
 import           Entity
 import           Query.Util
 import           Type                        as T
 
-selectUser' :: Query Int64 User
-selectUser' = relationalQuery' r []
-  where
-    r = relation' . placeholder $ \ph -> do
-      u <- query user
-      wheres $ u ! #id .=. ph
-      return u
+-- selectUser' :: Query Int64 User
+-- selectUser' = relationalQuery' r []
+--   where
+--     r = relation' . placeholder $ \ph -> do
+--       u <- query user
+--       wheres $ u ! #id .=. ph
+--       return u
 
-selectTasks :: Query Int64 Task
-selectTasks = relationalQuery' r []
+-- selectTasks :: Query Int64 Task
+-- selectTasks = relationalQuery' r []
+--   where
+--     r = relation' . placeholder $ \ph -> do
+--       t <- query task
+--       wheres $ t ! #userId .=. ph
+--       return t
+
+q x = relationalQuery' (relation x) []
+q' x = relationalQuery' (relation'. placeholder $ x) []
+
+selectUsers :: Query String User
+selectUsers =  q' $ \ph -> do
+  u <- query user
+  ou <- query ownerUser
+  wheres $ ou ! #ownerId .=. ph
+  return u
+
+
+selectPosts :: Query () Post
+selectPosts = relationalQuery' r []
   where
-    r = relation' . placeholder $ \ph -> do
-      t <- query task
-      wheres $ t ! #userId .=. ph
-      return t
+    r = relation $ do
+      p <- query post
+      desc $ p ! #id
+      return p
 
 -- todo: 整理
 makeInclude ::
@@ -59,5 +78,5 @@ make1NInclude t1 c1 t2 c2 k ordC ids = relation $ do
   asc $ a ! ordC
   return $ (a ! k) >< b
 
-includeTags :: [ResourceId] -> Relation () (ResourceId, TaskTag)
-includeTags = makeInclude taskTag #taskId
+includeUserImages :: [ResourceId] -> Relation () (ResourceId, UserImage)
+includeUserImages = makeInclude userImage #userId
