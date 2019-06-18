@@ -9,9 +9,11 @@ module Service.Post where
 import           App
 -- import           Data.Type.Map as TM
 import           Entity
-import qualified Query  as Q
+import           Entity.Post
+import qualified Query       as Q
 -- import           Service.Loader
--- import           Type
+import           Auth
+import           Type
 
 getPosts :: MonadService m => m [Post]
 getPosts =
@@ -26,3 +28,14 @@ getPosts =
 --         Map (("tags" ':-> TMap ResourceId [TaskTag]) : v))
 -- loadTasksRelation rs =
 --   loadTags (Var :: Var "tags") ((^. #id) <$> rs)
+
+createPost :: MonadService m => AccountId -> ResourceId -> String -> m ResourceId
+createPost aid uid body = do
+  pid <- getTid
+  let p = Post
+        { id = pid
+        , userId = uid
+        , body = body
+        }
+  insertM insertPost p
+  return pid

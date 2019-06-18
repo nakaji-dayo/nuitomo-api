@@ -45,6 +45,12 @@ data PostResponse = PostResponse
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''PostResponse)
 
+data CreatePostRequest= CreatePostRequest
+  { userId :: ResourceId
+  , body   :: String
+  } deriving (Show, Generic, Eq)
+$(deriveApiField ''CreatePostRequest)
+
 data UserResponse = UserResponse
   { id         :: ResourceId
   , name       :: String

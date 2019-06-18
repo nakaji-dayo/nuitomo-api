@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedLabels #-}
 module Handler.Post where
 
 import           App
@@ -13,3 +14,7 @@ getPostsR _ = do
   xs <- getPosts
   -- loaded <- snd <$> loadPostsRelation xs TM.Empty
   runViewM $ mapM renderPost xs
+
+postPostsR :: AuthUser -> CreatePostRequest -> AppM ResourceId
+postPostsR u req =
+  createPost (u ^. #sub) (req ^. #userId) (req ^. #body)

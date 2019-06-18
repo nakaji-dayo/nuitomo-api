@@ -38,6 +38,7 @@ type Protected =
 
 type PostAPI =
   Summary "List posts" :> "posts" :> Get '[JSON] [PostResponse]
+  :<|> Summary "Create Post" :> "posts" :> ReqBody '[JSON] CreatePostRequest :> Post '[JSON] ResourceId
 
 type UserAPI =
   Summary "List User" :> "users" :> Get '[JSON] [UserResponse]
@@ -58,7 +59,7 @@ protected (Authenticated au) =
 protected x                  = trace (show x) $ throwAll err401
 
 postApi :: AuthUser -> ServerT PostAPI AppM
-postApi = getPostsR
+postApi au = getPostsR au :<|> postPostsR au
 
 userApi :: AuthUser -> ServerT UserAPI AppM
 userApi au = getUsersR au :<|> postUsersR au

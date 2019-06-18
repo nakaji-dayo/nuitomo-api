@@ -17,11 +17,11 @@ import           Query            as Q
 import           Service.Loader
 import           Type
 
-getUser :: MonadService m => AuthUser -> m [User]
-getUser au = queryM selectUsers (au ^. #sub)
+getUser :: MonadService m => AccountId -> m [User]
+getUser aid = queryM selectUsers aid
 
-createUser :: MonadService m => AuthUser -> String -> String -> m ResourceId
-createUser au name imagePath = do
+createUser :: MonadService m => AccountId -> String -> String -> m ResourceId
+createUser aid name imagePath = do
   uid <- getTid
   uiid <- getTid
   oid <- getTid
@@ -36,7 +36,7 @@ createUser au name imagePath = do
         }
       ou = OwnerUser
         { id = oid
-        , ownerId = au ^. #sub
+        , ownerId = aid
         , userId = uid
         , isPrimary = True
         }

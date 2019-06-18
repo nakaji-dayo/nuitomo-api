@@ -11,10 +11,10 @@ import           View
 
 getUsersR :: AuthUser -> AppM [UserResponse]
 getUsersR au = do
-  xs <- getUser au
+  xs <- getUser (au ^. #sub)
   loaded <- snd <$> loadUserRelation xs TM.Empty
   runViewM $ mapM (renderUser loaded) xs
 
 postUsersR :: AuthUser -> CreateUserRequest ->  AppM ResourceId
 postUsersR au req =
-  createUser au (req ^. #name) (req ^. #imagePath)
+  createUser (au ^. #sub) (req ^. #name) (req ^. #imagePath)
