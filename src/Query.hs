@@ -11,7 +11,7 @@ module Query where
 -- import           Data.Int
 import           Database.Record.Persistable (PersistableWidth)
 import           Database.Relational
-import           Entity
+import           Entity                      as E
 import           Query.Util
 import           Type                        as T
 
@@ -36,7 +36,7 @@ q' x = relationalQuery' (relation'. placeholder $ x) []
 
 selectUsers :: Query String User
 selectUsers =  q' $ \ph -> do
-  u <- query user
+  u <- query E.user
   ou <- query ownerUser
   wheres $ ou ! #ownerId .=. ph
   return u
@@ -49,6 +49,11 @@ selectPosts = relationalQuery' r []
       p <- query post
       desc $ p ! #id
       return p
+
+include e ids = relation $ do
+  r <- query e
+  wheres $ r ! #id `in'` values' ids
+  return $ (r ! #id) >< r
 
 -- todo: 整理
 makeInclude ::
@@ -78,5 +83,9 @@ make1NInclude t1 c1 t2 c2 k ordC ids = relation $ do
   asc $ a ! ordC
   return $ (a ! k) >< b
 
+-- includeUsers = makeInclude
+
 includeUserImages :: [ResourceId] -> Relation () (ResourceId, UserImage)
 includeUserImages = makeInclude userImage #userId
+
+includePostImages = makeInclude postImage #postId

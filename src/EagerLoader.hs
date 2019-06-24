@@ -1,5 +1,4 @@
 -- todo: 要整理、ライブラリ化
-{-# LANGUAGE CPP                   #-}
 {-# LANGUAGE DataKinds             #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts      #-}
@@ -16,10 +15,11 @@ import           Util
 
 type TMap = M.Map
 
+-- (->>) :: (Monad m, MonadService m) => m (a, t) -> (t -> m b) -> m b
 (->>) :: Monad m => m (a, t) -> (t -> m b) -> m b
-(->>) f g = f >>= \(_, b) -> g b
+f ->> g = f >>= \(_, b) -> g b
 
-(->>=) :: Monad m => m (a, b) -> (a -> b -> m b1) -> m b1
+-- (->>=) :: Monad m => m (a, b) -> (a -> b -> m b1) -> m b1
 (->>=) f g = f >>= uncurry g
 
 load ::

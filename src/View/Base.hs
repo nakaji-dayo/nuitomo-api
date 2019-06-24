@@ -12,8 +12,8 @@ data ViewError = ErrEagerLoading String | ErrJsonDecode
   deriving (Show)
 instance Exception ViewError
 
-get :: (KnownSymbol v, Ord k, IsMember v (M.Map k a) m) => Var v -> Map m -> k -> ViewM a
-get key included rid = case M.lookup rid $ lookp key included of
+get :: (KnownSymbol v, Ord k, IsMember v (M.Map k a) m) => k -> Var v -> Map m -> ViewM a
+get rid key included = case M.lookup rid $ lookp key included of
   Just x  -> return x
   Nothing -> throwM $ ErrEagerLoading (show key)
 

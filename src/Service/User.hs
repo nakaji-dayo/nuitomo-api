@@ -21,14 +21,14 @@ getUser :: MonadService m => AccountId -> m [User]
 getUser aid = queryM selectUsers aid
 
 createUser :: MonadService m => AccountId -> String -> String -> m ResourceId
-createUser aid name imagePath = do
+createUser aid name imageUrl = do
   uid <- getTid
   uiid <- getTid
   oid <- getTid
   let ui = UserImage
         { id = uiid
         , userId = uid
-        , path = imagePath
+        , url = imageUrl
         }
       u = User
         { id = uid

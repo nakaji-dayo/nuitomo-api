@@ -15,10 +15,18 @@ import           Entity
 import           Query
 import           Type
 
-type UserImageMap = Map ResourceId [UserImage]
+type UserMap = Map ResourceId User
+type UserImagesMap = Map ResourceId [UserImage]
+type PostImagesMap = Map ResourceId [PostImage]
 
 -- loadTags :: ListLoader ResourceId TaskTag
 -- loadTags = loadList includeTags
 
 loadUserImages :: ListLoader ResourceId UserImage
 loadUserImages = loadList includeUserImages
+
+loadPostImages :: ListLoader ResourceId PostImage
+loadPostImages = loadList includePostImages
+
+loadUser :: Loader ResourceId User
+loadUser = load (include Entity.user)
