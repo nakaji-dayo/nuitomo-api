@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP                   #-}
 {-# LANGUAGE DataKinds             #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts      #-}
@@ -16,25 +15,32 @@ import           Type
 import           View.Base
 import           View.Helper
 
-renderPost :: Post -> ViewM PostResponse
-renderPost t = do
-  -- ts <- getList (t ^. #id) (Var :: Var "tags") loaded
+renderPost :: (IsMember "users" UserMap c
+              , IsMember "userImages" UserImagesMap c
+              , IsMember "postImages" PostImagesMap c) =>
+  Map c -> Post -> ViewM PostResponse
+renderPost c p = do
+  u <- get (p ^. #userId) (Var :: Var "users") c
+  is <- getList (p ^. #id) (Var :: Var "postImages") c
+  vImages <-  mapM renderImage (is :: [PostImage])
+  vUser <- renderUser c u
   return $ PostResponse
-      { id = t ^. #id
-      , body = t ^. #body
+      { id = p ^. #id
+      , body = p ^. #body
+      , user = vUser
+      , images = vImages
       }
 
 renderUser :: (IsMember
-                "userImages" UserImageMap c
+                "userImages" UserImagesMap c
               ) => Map c -> User -> ViewM UserResponse
 renderUser c x = do
   is <- getList (x ^. #id) (Var :: Var "userImages") c
-  isV <-  mapM renderUserImage is
+  isV <-  mapM renderImage (is :: [UserImage])
   return $ UserResponse
     { id = x ^. #id
     , name = x ^. #name
-    , imagePaths = isV
+    , images = isV
     }
 
-renderUserImage :: UserImage -> ViewM String
-renderUserImage x = return $ x ^. #path
+renderImage x = return $ x ^. #url

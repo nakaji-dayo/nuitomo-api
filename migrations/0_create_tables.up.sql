@@ -15,7 +15,7 @@ create table owner_user (
 create table user_image (
   id bigint not null,
   user_id bigint references "user"(id) not null,
-  path text not null,
+  url text not null,
   primary key (id)
 );
 
@@ -23,13 +23,14 @@ create table post (
   id bigint not null,
   user_id bigint references "user"(id) not null,
   body text not null,
+  reply_to bigint references "post"(id),
   primary key (id)
 );
 
 create table post_image (
   id bigint not null,
   post_id bigint references "post"(id) not null,
-  path text not null,
+  url text not null,
   primary key (id)
 );
 

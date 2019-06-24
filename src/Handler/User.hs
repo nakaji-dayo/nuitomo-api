@@ -17,4 +17,4 @@ getUsersR au = do
 
 postUsersR :: AuthUser -> CreateUserRequest ->  AppM ResourceId
 postUsersR au req =
-  createUser (au ^. #sub) (req ^. #name) (req ^. #imagePath)
+  createUser (au ^. #sub) (req ^. #name) (req ^. #image)
