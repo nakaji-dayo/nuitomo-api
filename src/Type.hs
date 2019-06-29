@@ -67,3 +67,8 @@ data CreatePostRequest= CreatePostRequest
   , replyTo :: Maybe ResourceId
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''CreatePostRequest)
+
+data CreateFollowRequest= CreateFollowRequest
+  { toUserId  :: ResourceId
+  } deriving (Show, Generic, Eq)
+$(deriveApiField ''CreateFollowRequest)

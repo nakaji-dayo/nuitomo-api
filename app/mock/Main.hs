@@ -13,7 +13,7 @@ import           Servant                  hiding (Context)
 import           Servant.Mock
 
 
-type API' = Protected :<|> UnProtected
+type API' = Protected' :<|> UnProtected
 
 api' :: Proxy API'
 api' = Proxy

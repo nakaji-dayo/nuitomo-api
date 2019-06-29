@@ -21,7 +21,7 @@ import           Katip
 import           Network.Wai.Handler.Warp
 import           Network.Wai.Middleware.Cors
 import           Servant                     hiding (Context)
-import           Servant.Auth.Server
+import           Servant.Auth.Firebase
 import           Servant.Swagger.Tags
 import           Type
 
@@ -32,7 +32,7 @@ import           Debug.Trace
 -- instance HasSwagger api => HasSwagger (MultipartForm a b :> api) where
 --   toSwagger Proxy = toSwagger $ Proxy @api
 
-type Protected =
+type Protected' =
   Tags "Post" :> PostAPI
   :<|> Tags "User" :> UserAPI
 
@@ -40,29 +40,48 @@ type PostAPI =
   Summary "List posts" :> "posts" :> Get '[JSON] [PostResponse]
   :<|> Summary "Create Post" :> "posts" :> ReqBody '[JSON] CreatePostRequest :> Post '[JSON] ResourceId
 
+postApi :: AccountId -> ServerT PostAPI AppM
+postApi au = getPostsR au :<|> postPostsR au
+
 type UserAPI =
-  Summary "List User" :> "users" :> Get '[JSON] [UserResponse]
-  :<|> Summary "Create User" :> "users" :> ReqBody '[JSON] CreateUserRequest :> Post '[JSON] ResourceId
+  "users" :> (
+  Summary "List User" :> Get '[JSON] [UserResponse]
+  :<|> Summary "Search User" :> "_search" :> QueryParam "q" String :> Get '[JSON] [UserResponse]
+  :<|> Summary "User" :> Capture "id" ResourceId :> Get '[JSON] UserResponse
+  :<|> Summary "Create User" :> ReqBody '[JSON] CreateUserRequest :> Post '[JSON] ResourceId
+  -- user specific actions
+  :<|> Capture "id" ResourceId :> "follows" :> Summary "Create Follow" :> ReqBody '[JSON] CreateFollowRequest :> Post '[JSON] ()
+  :<|> Capture "id" ResourceId :> "follows" :> Summary "Delete Follow" :> ReqBody '[JSON] CreateFollowRequest :> Delete '[JSON] ()
+  :<|> Capture "id" ResourceId :> "followees" :> Summary "List Followee" :> Get '[JSON] [UserResponse]
+  :<|> Capture "id" ResourceId :> "followers" :> Summary "List Follower" :> Get '[JSON] [UserResponse]
+  )
+
+
+userApi :: AccountId -> ServerT UserAPI AppM
+userApi au = (
+  getUsersR au
+  :<|> getUsersSearchR au
+  :<|> getUserR au
+  :<|> postUsersR au
+  --
+  :<|> postFollowsR au
+  :<|> deleteFollowsR au
+  :<|> getFolloweesR au
+  :<|> getFollowersR au
+  )
 
 type UnProtected =
   Tags "System" :>
   ( Summary "version" :> "_version" :> Get '[JSON] String
   )
 
-type API auths = Auth auths AuthUser :> Protected
+type API = Protected :> Protected'
   :<|> UnProtected
 
-protected :: AuthResult AuthUser -> ServerT Protected AppM
-protected (Authenticated au) =
-  postApi au
-  :<|> userApi au
-protected x                  = trace (show x) $ throwAll err401
-
-postApi :: AuthUser -> ServerT PostAPI AppM
-postApi au = getPostsR au :<|> postPostsR au
-
-userApi :: AuthUser -> ServerT UserAPI AppM
-userApi au = getUsersR au :<|> postUsersR au
+protected :: AccountId -> ServerT Protected' AppM
+protected i =
+  postApi i
+  :<|> userApi i
 
 unprotected :: ServerT UnProtected AppM
 unprotected =
@@ -70,16 +89,15 @@ unprotected =
   where
     systemAPI = getVersionR
 
-server :: ServerT (API auths) AppM
+server :: ServerT API AppM
 server = protected :<|> unprotected
 
 -- server' = protected Servant.Auth.Server.NoSuchUser :<|> unprotected
 
 -- app :: Context -> LogEnv -> Application
-app :: Context -> JWTSettings -> LogEnv -> Application
-app ctx@Context{config=cfg} jwtCfg logEnv =
+app :: Context -> FirebaseLoginSettings -> LogEnv -> Application
+app ctx@Context{config=cfg} settings logEnv =
   let
-    setting = defaultCookieSettings :. jwtCfg :. EmptyContext
     corigin = case Config.deployEnv cfg of
       Config.Development -> Nothing
       _                  -> Nothing
@@ -89,17 +107,17 @@ app ctx@Context{config=cfg} jwtCfg logEnv =
                    , corsRequestHeaders =   [ "Accept", "Accept-Language", "Content-Language", "Content-Type", "Authorization"]
                    , corsOrigins = corigin
                    })
-    psetting = Proxy :: Proxy '[CookieSettings, JWTSettings]
-    hserver = hoistServerWithContext api psetting (nt ctx (logEnv, "serve") . handleGeneralException) server :: Server (API auths)
+    psetting = Proxy :: Proxy '[FirebaseLoginSettings]
+    s = settings :. EmptyContext
+    hserver = hoistServerWithContext api psetting (nt ctx (logEnv, "serve") . handleGeneralException) server :: Server API
   in
-    cors' $ serveWithContext api setting hserver
+    cors' $ serveWithContext api s hserver
 
-api :: Proxy (API '[JWT])
+api :: Proxy API
 api = Proxy
 
 serve :: IO ()
 serve = do
   (ctx, logEnv) <- initialize
-  let jwtCfg = mkJwtCfg (Config.apiSecretKey $ config ctx)
-  jwtCfg' <- getFirebaseAuthJwtSettings (signingKey jwtCfg)
-  run (Config.apiPort (config ctx)) (app ctx jwtCfg' logEnv)
+  let s = defaultFirebaseLoginSettings (httpClientManager ctx) (ProjectId "nuitomo-c4587")
+  run (Config.apiPort (config ctx)) (app ctx s logEnv)

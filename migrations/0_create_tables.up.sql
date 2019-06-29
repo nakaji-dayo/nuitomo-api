@@ -34,6 +34,14 @@ create table post_image (
   primary key (id)
 );
 
+create table follow (
+  id bigint not null,
+  user_id bigint references "user"(id) not null,
+  to_user_id bigint references "user"(id) not null,
+  unique (user_id, to_user_id),
+  primary key (id)
+);
+
 create table "like" (
   id bigint not null,
   post_id bigint references "post"(id) not null,
