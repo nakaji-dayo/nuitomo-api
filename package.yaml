@@ -64,6 +64,11 @@ library:
   - servant-swagger-tags
   - x509
   - pem
+  - servant-swagger
+  - network-uri
+  - http-client
+  - word8
+  - unordered-containers
 
 executables:
   nuitomo-api-api:

@@ -18,7 +18,7 @@ import           Servant.Swagger.UI
 import           System.Environment
 
 doc :: Swagger
-doc = toSwagger (Proxy :: Proxy (API '[JWT]))
+doc = toSwagger (Proxy :: Proxy API)
   & info.title .~ "nuitomo-api"
   & host ?~ "localhost:8080"
 

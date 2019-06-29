@@ -15,14 +15,16 @@ import           EagerLoader
 import           Entity
 import           Entity.Post
 import           Entity.PostImage
-import qualified Query            as Q
+import           Query
 import           Service.Loader
 import           Service.User
 import           Type
 
-getPosts :: MonadService m => m [Post]
-getPosts =
-  queryM Q.selectPosts ()
+getPosts :: MonadService m => AccountId -> m [Post]
+getPosts aid = do
+  uids <- queryM selectUserIds (unAccountId aid)
+  uids' <- queryM selectOwnerFollowees (unAccountId aid)
+  queryM (selectPosts (uids ++ uids')) ()
 
 createPost :: MonadService m => AccountId -> ResourceId -> String -> [String] -> Maybe ResourceId -> m ResourceId
 createPost aid uid body urls rep = do
