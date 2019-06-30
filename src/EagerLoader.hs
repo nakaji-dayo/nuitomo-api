@@ -1,4 +1,4 @@
--- todo: 要整理、ライブラリ化
+-- Todo: 要整理、ライブラリ化
 {-# LANGUAGE DataKinds             #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts      #-}
@@ -9,6 +9,7 @@ module EagerLoader where
 
 import           App
 import qualified Data.Map                           as M
+import           Data.Maybe
 import           Data.Type.Map                      as TM
 import           Database.Relational.Monad.BaseType (Relation)
 import           Util
@@ -43,6 +44,10 @@ loadList ::
   -> m1 ([b], Map ((k ':-> M.Map a [b]) : m2))
 loadList query key ids m = do
   rs <- queryM (relationalQuery' (query ids) []) ()
+  return (snd <$> rs, Ext key (createMapWithListValue rs) m)
+
+loadList' query key ids m = do
+  rs <- fmap (mapFst fromJust) <$> queryM (relationalQuery' (query ids) []) ()
   return (snd <$> rs, Ext key (createMapWithListValue rs) m)
 
 type MkLoader ek r e = forall m k v . MonadService m => Var k -> [ek] -> Map v -> m (r, Map ((k ':-> M.Map ek e) : v))
