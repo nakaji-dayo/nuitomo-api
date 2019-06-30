@@ -48,6 +48,11 @@ createPost aid uid body urls rep = do
   return pid
 
 loadPostsRelation xs ctx =
-  loadPostImages (Var :: Var "postImages") ((^. #id) <$> xs) ctx
-   ->> loadUser (Var :: Var "users") ((^. #userId) <$> xs)
-  ->>= loadUserRelation
+  base xs ctx
+  ->> loadPostReplies (Var :: Var "replies") ((^. #id) <$> xs)
+  ->>= base
+  where
+    base cs ctx =
+      loadPostImages (Var :: Var "postImages") ((^. #id) <$> xs) ctx
+      ->> loadUser (Var :: Var "users") ((^. #userId) <$> xs)
+      ->>= loadUserRelation

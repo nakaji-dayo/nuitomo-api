@@ -89,13 +89,12 @@ selectUserIds =  q' $ \ph -> do
   pure $ ou ! #userId
 
 selectPosts :: [ResourceId] -> Query () Post
-selectPosts uids = relationalQuery' r []
-  where
-    r = relation $ do
-      p <- query post
-      wheres $ p ! #userId `in'` values' uids
-      desc $ p ! #id
-      pure p
+selectPosts uids = q $ do
+  p <- query post
+  wheres $ p ! #userId `in'` values' uids
+  wheres $ isNothing (p ! #replyTo)
+  desc $ p ! #id
+  pure p
 
 
 deleteFollow :: Delete (ResourceId, ResourceId)
@@ -144,3 +143,12 @@ includeUserImages :: [ResourceId] -> Relation () (ResourceId, UserImage)
 includeUserImages = makeInclude userImage #userId
 
 includePostImages = makeInclude postImage #postId
+
+includePostReplies
+  :: [ResourceId]
+     -> Relation () (Maybe ResourceId, Post)
+includePostReplies ids = relation $ do
+  p <- query post
+  wheres $ p ! #replyTo `in'` (values (Just <$> ids))
+  wheres $ isJust (p ! #replyTo)
+  pure $ (p ! #replyTo) >< p

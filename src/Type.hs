@@ -53,10 +53,12 @@ data CreateUserRequest = CreateUserRequest
 $(deriveApiField ''CreateUserRequest)
 
 data PostResponse = PostResponse
-  { id     :: ResourceId
-  , body   :: String
-  , user   :: UserResponse
-  , images :: [String]
+  { id        :: ResourceId
+  , body      :: String
+  , user      :: UserResponse
+  , images    :: [String]
+  , replyToId :: Maybe ResourceId
+  , replies   :: [PostResponse]
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''PostResponse)
 

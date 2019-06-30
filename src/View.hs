@@ -17,18 +17,23 @@ import           View.Helper
 
 renderPost :: (IsMember "users" UserMap c
               , IsMember "userImages" UserImagesMap c
-              , IsMember "postImages" PostImagesMap c) =>
+              , IsMember "postImages" PostImagesMap c
+              , IsMember "replies" PostPostsMap c) =>
   Map c -> Post -> ViewM PostResponse
 renderPost c p = do
   u <- get (p ^. #userId) (Var :: Var "users") c
   is <- getList (p ^. #id) (Var :: Var "postImages") c
+  rs <- getList (p ^. #id) (Var :: Var "replies") c
   vImages <-  mapM renderImage (is :: [PostImage])
   vUser <- renderUser c u
+  vReplies <-  mapM (renderPost c) rs
   return $ PostResponse
       { id = p ^. #id
       , body = p ^. #body
       , user = vUser
       , images = vImages
+      , replies = vReplies
+      , replyToId = p ^. #replyTo
       }
 
 renderUser :: (IsMember

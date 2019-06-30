@@ -86,4 +86,4 @@ getFollowees :: MonadService m => ResourceId -> m [User]
 getFollowees uid = queryM selectFollowees uid
 
 getFollowers :: MonadService m => ResourceId -> m [User]
-getFollowers uid = queryM selectFollowees uid
+getFollowers uid = queryM selectFollowers uid

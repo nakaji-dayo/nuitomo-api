@@ -18,6 +18,7 @@ import           Type
 type UserMap = Map ResourceId User
 type UserImagesMap = Map ResourceId [UserImage]
 type PostImagesMap = Map ResourceId [PostImage]
+type PostPostsMap = Map (ResourceId) [Post]
 
 -- loadTags :: ListLoader ResourceId TaskTag
 -- loadTags = loadList includeTags
@@ -30,3 +31,6 @@ loadPostImages = loadList includePostImages
 
 loadUser :: Loader ResourceId User
 loadUser = load (include Entity.user)
+
+loadPostReplies :: ListLoader ResourceId Post
+loadPostReplies  = loadList' includePostReplies
