@@ -47,12 +47,10 @@ createPost aid uid body urls rep = do
     bulkInsertM insertPostImage pis
   return pid
 
-loadPostsRelation xs ctx =
-  base xs ctx
-  ->> loadPostReplies (Var :: Var "replies") ((^. #id) <$> xs)
-  ->>= base
-  where
-    base cs ctx =
-      loadPostImages (Var :: Var "postImages") ((^. #id) <$> xs) ctx
-      ->> loadUser (Var :: Var "users") ((^. #userId) <$> xs)
-      ->>= loadUserRelation
+loadPostsRelation xs ctx = do
+  (us, ctx') <- loadPostImages (Var :: Var "postImages") ((^. #id) <$> xs) ctx
+  (ps, ctx'') <- loadPostReplies (Var :: Var "replies") ((^. #id) <$> xs) ctx'
+  let ps' = xs ++ ps
+  loadPostImages (Var :: Var "postImages") ((^. #id) <$> ps') ctx''
+    ->> loadUser (Var :: Var "users") ((^. #userId) <$> ps')
+    ->>=loadUserRelation
