@@ -9,11 +9,12 @@ module Service.User where
 
 import           App
 import           Auth
+import           Data.Maybe
 import           Data.Type.Map     as TM
 import           Entity
 import           Entity.Follow
 import           Entity.OwnerUser
-import           Entity.User
+import           Entity.User       as E
 import           Entity.UserImage
 import           Query             as Q
 import           Service.Exception
@@ -46,6 +47,13 @@ createUser (AccountId aid) name imageUrl = do
       u = User
         { id = uid
         , name = name
+        , bio = ""
+        , nickname = ""
+        , gender = ""
+        , hometown = ""
+        , entryDate = ""
+        , favoriteThing = ""
+        , dislikeThing = ""
         }
       ou = OwnerUser
         { id = oid
@@ -58,6 +66,23 @@ createUser (AccountId aid) name imageUrl = do
     insertM insertUserImage ui
     insertM insertOwnerUser ou
   return uid
+
+updateUser :: MonadService m => AccountId -> ResourceId -> UpdateUserRequest -> m ()
+updateUser (AccountId aid) uid req = do
+  u <- getOwnUser aid uid
+  let u' = u
+        { name = fromMaybe (u ^. #name) (req ^. #name)
+        , bio = fromMaybe (u ^. #bio) (req ^. #bio)
+        , nickname = fromMaybe (u ^. #nickname) (req ^. #nickname)
+        , gender = fromMaybe (u ^. #gender) (req ^. #gender)
+        , hometown = fromMaybe (u ^. #hometown) (req ^. #hometown)
+        , entryDate = fromMaybe (u ^. #entryDate) (req ^. #entryDate)
+        , favoriteThing = fromMaybe (u ^. #favoriteThing) (req ^. #favoriteThing)
+        , dislikeThing = fromMaybe (u ^. #dislikeThing) (req ^. #dislikeThing)
+        } :: User
+  keyUpdateM E.updateUser u'
+  pure ()
+
 
 loadUserRelation rs =
   loadUserImages (Var :: Var "userImages") ((^. #id) <$> rs)

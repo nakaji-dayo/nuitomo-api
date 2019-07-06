@@ -149,6 +149,9 @@ includePostReplies
      -> Relation () (Maybe ResourceId, Post)
 includePostReplies ids = relation $ do
   p <- query post
-  wheres $ p ! #replyTo `in'` (values (Just <$> ids))
+  wheres $ p ! #replyTo `in'` (values'' (Just <$> ids))
   wheres $ isJust (p ! #replyTo)
   pure $ (p ! #replyTo) >< p
+  where
+    values'' [] = values [Just (-1)]
+    values'' xs = values xs
