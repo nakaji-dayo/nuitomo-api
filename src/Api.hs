@@ -48,8 +48,8 @@ type UserAPI =
   Summary "List User" :> Get '[JSON] [UserResponse]
   :<|> Summary "Search User" :> "_search" :> QueryParam "q" String :> Get '[JSON] [UserResponse]
   :<|> Summary "User" :> Capture "id" ResourceId :> Get '[JSON] UserResponse
+  :<|> Summary "Update User" :> Capture "id" ResourceId :> ReqBody '[JSON] UpdateUserRequest :> Patch '[JSON] ()
   :<|> Summary "Create User" :> ReqBody '[JSON] CreateUserRequest :> Post '[JSON] ResourceId
-  -- user specific actions
   :<|> Capture "id" ResourceId :> "follows" :> Summary "Create Follow" :> ReqBody '[JSON] CreateFollowRequest :> Post '[JSON] ()
   :<|> Capture "id" ResourceId :> "follows" :> Summary "Delete Follow" :> ReqBody '[JSON] CreateFollowRequest :> Delete '[JSON] ()
   :<|> Capture "id" ResourceId :> "followees" :> Summary "List Followee" :> Get '[JSON] [UserResponse]
@@ -62,6 +62,7 @@ userApi au = (
   getUsersR au
   :<|> getUsersSearchR au
   :<|> getUserR au
+  :<|> patchUserR au
   :<|> postUsersR au
   --
   :<|> postFollowsR au

@@ -70,6 +70,19 @@ data CreatePostRequest= CreatePostRequest
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''CreatePostRequest)
 
+data UpdateUserRequest = UpdateUserRequest
+  { name          :: Maybe String
+  , bio           :: Maybe String
+  , nickname      :: Maybe String
+  , gender        :: Maybe String
+  , hometown      :: Maybe String
+  , entryDate     :: Maybe String
+  , favoriteThing :: Maybe String
+  , dislikeThing  :: Maybe String
+  }
+ deriving (Show, Generic, Eq)
+$(deriveApiField ''UpdateUserRequest)
+
 data CreateFollowRequest= CreateFollowRequest
   { toUserId  :: ResourceId
   } deriving (Show, Generic, Eq)

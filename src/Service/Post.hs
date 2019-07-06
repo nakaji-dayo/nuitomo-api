@@ -34,6 +34,7 @@ createPost aid uid body urls rep = do
         , userId = uid
         , body = body
         , replyTo = rep
+        , mentionTo = Nothing
         }
   pis <- forM urls $ \x -> do
     iid <- getTid

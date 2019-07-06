@@ -40,3 +40,6 @@ getFolloweesR _ uid = getFollowees uid >>= loadRenderUsers
 
 getFollowersR :: AccountId -> ResourceId -> AppM [UserResponse]
 getFollowersR _ uid = getFollowers uid >>= loadRenderUsers
+
+patchUserR :: AccountId -> ResourceId -> UpdateUserRequest -> AppM ()
+patchUserR = updateUser
