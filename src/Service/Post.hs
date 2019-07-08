@@ -20,11 +20,15 @@ import           Service.Loader
 import           Service.User
 import           Type
 
-getPosts :: MonadService m => AccountId -> m [Post]
-getPosts aid = do
-  uids <- queryM selectUserIds (unAccountId aid)
-  uids' <- queryM selectOwnerFollowees (unAccountId aid)
-  queryM (selectPosts (uids ++ uids')) ()
+getPosts :: MonadService m => AccountId -> Maybe ResourceId -> m [Post]
+getPosts aid muid = do
+  uids <- case muid of
+    Nothing -> do
+      uids <- queryM selectUserIds (unAccountId aid)
+      uids' <- queryM selectOwnerFollowees (unAccountId aid)
+      pure $ uids ++ uids'
+    Just x -> pure [x]
+  queryM (selectPosts uids) ()
 
 createPost :: MonadService m => AccountId -> ResourceId -> String -> [String] -> Maybe ResourceId -> m ResourceId
 createPost aid uid body urls rep = do

@@ -8,7 +8,9 @@ module View where
 
 import           App
 import           Control.Lens
-import           Data.Type.Map  as TM
+import           Data.Default.Class
+import           Data.Generics.Product.Subtype
+import           Data.Type.Map                 as TM
 import           Entity
 import           Service.Loader
 import           Type
@@ -46,6 +48,21 @@ renderUser c x = do
     { id = x ^. #id
     , name = x ^. #name
     , images = isV
+    }
+
+renderDetailUser :: (IsMember
+                "userImages" UserImagesMap c
+              ) => Map c -> User -> ViewM DetailUserResponse
+renderDetailUser c x = do
+  u <- renderUser c x
+  return $ smash u (def :: DetailUserResponse)
+    { bio = x ^. #bio
+    , nickname = x ^. #nickname
+    , gender = x ^. #gender
+    , hometown = x ^. #hometown
+    , entryDate = x ^. #entryDate
+    , favoriteThing = x ^. #favoriteThing
+    , dislikeThing = x ^. #dislikeThing
     }
 
 renderImage x = return $ x ^. #url

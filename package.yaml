@@ -23,6 +23,7 @@ dependencies:
 - exceptions
 - transformers-base
 - time
+- extend-record-data-th
 
 library:
   source-dirs: src

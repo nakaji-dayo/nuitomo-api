@@ -18,11 +18,13 @@ module Type (
 
 import           Control.Lens       ((^.))
 import           Data.Int           (Int64)
+import           Data.Record.Extend
 import           Data.Time
 import           Data.Time.Calendar
 import           GHC.Generics
 import           Instance           ()
 import           TH.Type
+
 
 type ResourceId = Int64
 
@@ -45,6 +47,20 @@ data UserResponse = UserResponse
   , images :: [String]
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''UserResponse)
+
+data UserDetail= UserDetail
+  { bio           :: String
+  , nickname      :: String
+  , gender        :: String
+  , hometown      :: String
+  , entryDate     :: String
+  , favoriteThing :: String
+  , dislikeThing  :: String
+  } deriving (Show, Generic, Eq)
+$(deriveApiField ''UserDetail)
+
+$(extendD "data DetailUserResponse = UserResponse <> UserDetail deriving (Show, Generic, Eq)")
+$(deriveApiField ''DetailUserResponse)
 
 data CreateUserRequest = CreateUserRequest
  { name  :: String

@@ -37,7 +37,7 @@ type Protected' =
   :<|> Tags "User" :> UserAPI
 
 type PostAPI =
-  Summary "List posts" :> "posts" :> Get '[JSON] [PostResponse]
+  Summary "List posts" :> "posts" :> QueryParam "uid" ResourceId :> Get '[JSON] [PostResponse]
   :<|> Summary "Create Post" :> "posts" :> ReqBody '[JSON] CreatePostRequest :> Post '[JSON] ResourceId
 
 postApi :: AccountId -> ServerT PostAPI AppM
@@ -47,7 +47,7 @@ type UserAPI =
   "users" :> (
   Summary "List User" :> Get '[JSON] [UserResponse]
   :<|> Summary "Search User" :> "_search" :> QueryParam "q" String :> Get '[JSON] [UserResponse]
-  :<|> Summary "User" :> Capture "id" ResourceId :> Get '[JSON] UserResponse
+  :<|> Summary "User" :> Capture "id" ResourceId :> Get '[JSON] DetailUserResponse
   :<|> Summary "Update User" :> Capture "id" ResourceId :> ReqBody '[JSON] UpdateUserRequest :> Patch '[JSON] ()
   :<|> Summary "Create User" :> ReqBody '[JSON] CreateUserRequest :> Post '[JSON] ResourceId
   :<|> Capture "id" ResourceId :> "follows" :> Summary "Create Follow" :> ReqBody '[JSON] CreateFollowRequest :> Post '[JSON] ()
