@@ -49,6 +49,9 @@ migrate-down:
 	migrate -path migrations/ -database $(DBURL) down
 	./scripts/genTables.sh
 
+migrate-down-hard:
+	psql $(DBURL) -Atc "drop schema public cascade; create schema public;"
+
 # list dependencies
 .PHONY: deps
 deps:

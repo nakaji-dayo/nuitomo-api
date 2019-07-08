@@ -66,3 +66,7 @@ create table report (
   target_user_id bigint references "user"(id) not null,
   primary key (id)
 );
+
+create table notification (
+
+);

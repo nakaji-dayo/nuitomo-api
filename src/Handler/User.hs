@@ -19,11 +19,11 @@ getUsersR i = getUsers i >>= loadRenderUsers
 getUsersSearchR :: AccountId -> Maybe String -> AppM [UserResponse]
 getUsersSearchR _ q = searchUser q >>= loadRenderUsers
 
-getUserR :: AccountId -> ResourceId -> AppM UserResponse
+getUserR :: AccountId -> ResourceId -> AppM DetailUserResponse
 getUserR _ uid = do
   x <- getUser uid
   loaded <- snd <$> loadUserRelation [x] TM.Empty
-  runViewM $ renderUser loaded x
+  runViewM $ renderDetailUser loaded x
 
 postUsersR :: AccountId -> CreateUserRequest ->  AppM ResourceId
 postUsersR i req =
