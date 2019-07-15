@@ -10,11 +10,12 @@ module Query where
 
 -- import           Data.Int
 import           Control.Monad
-import           Database.Record.Persistable (PersistableWidth)
+import           Data.Functor.ProductIsomorphic.Class
+import           Database.Record.Persistable          (PersistableWidth)
 import           Database.Relational
-import           Entity                      as E
+import           Entity                               as E
 import           Query.Util
-import           Type                        as T
+import           Type                                 as T
 
 -- selectUser' :: Query Int64 User
 -- selectUser' = relationalQuery' r []
@@ -103,6 +104,25 @@ deleteFollow = delete $ \proj ->
     wheres $ (proj :: Record Flat Follow) ! #userId .=. (ph ! fst')
     wheres $ proj ! #toUserId .=. (ph ! snd')
 
+selectNotifications = q' $ \ph -> do
+  n <- query notification
+  ou <- query ownerUser
+  on $ n ! #userId .=. ou ! #userId
+  u <- query E.user
+  on $ u ! #id .=. n ! #userId
+  mpu <- queryMaybe E.user
+  on $ mpu ?! #id .=. n ! #refUserId
+  mp <- queryMaybe post
+  on $ mp ?! #id .=. n ! #refPostId
+  wheres $ ou ! #ownerId .=. ph
+  desc $ n ! #id
+  return $ (,,,) |$| n |*| u |*| mpu |*| mp
+
+deleteLike :: Delete (ResourceId, ResourceId)
+deleteLike = delete $ \proj ->
+  fmap fst . placeholder $ \ph -> do
+    wheres $ (proj :: Record Flat Like) ! #userId .=. (ph ! fst')
+    wheres $ proj ! #postId .=. (ph ! snd')
 
 include e ids = relation $ do
   r <- query e
@@ -155,3 +175,11 @@ includePostReplies ids = relation $ do
   where
     values'' [] = values [Just (-1)]
     values'' xs = values xs
+
+includePostLikes aid ids = relation $ do
+  l <- query E.like
+  ou <- query ownerUser
+  on $ l ! #userId .=. ou ! #userId
+  wheres $ ou ! #ownerId .=. value aid
+  wheres $ l ! #postId `in'` values' ids
+  pure $ (l ! #postId) >< l

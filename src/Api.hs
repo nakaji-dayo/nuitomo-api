@@ -32,16 +32,16 @@ import           Debug.Trace
 -- instance HasSwagger api => HasSwagger (MultipartForm a b :> api) where
 --   toSwagger Proxy = toSwagger $ Proxy @api
 
-type Protected' =
-  Tags "Post" :> PostAPI
-  :<|> Tags "User" :> UserAPI
-
 type PostAPI =
   Summary "List posts" :> "posts" :> QueryParam "uid" ResourceId :> Get '[JSON] [PostResponse]
   :<|> Summary "Create Post" :> "posts" :> ReqBody '[JSON] CreatePostRequest :> Post '[JSON] ResourceId
+  :<|> "likes" :> ReqBody '[JSON] CreateLikeRequest :> Post '[JSON] ResourceId
+  :<|> "likes" :> ReqBody '[JSON] CreateLikeRequest :> Delete '[JSON] ()
 
 postApi :: AccountId -> ServerT PostAPI AppM
 postApi au = getPostsR au :<|> postPostsR au
+  :<|> postLikesR au
+  :<|> deleteLikesR au
 
 type UserAPI =
   "users" :> (
@@ -71,6 +71,11 @@ userApi au = (
   :<|> getFollowersR au
   )
 
+type OtherAPI =
+  "notifications" :> Get '[JSON] [GetNotification]
+
+otherApi au = getNotificationsR au
+
 type UnProtected =
   Tags "System" :>
   ( Summary "version" :> "_version" :> Get '[JSON] String
@@ -79,10 +84,16 @@ type UnProtected =
 type API = Protected :> Protected'
   :<|> UnProtected
 
+type Protected' =
+  Tags "Post" :> PostAPI
+  :<|> Tags "User" :> UserAPI
+  :<|> Tags "Other" :> OtherAPI
+
 protected :: AccountId -> ServerT Protected' AppM
 protected i =
   postApi i
   :<|> userApi i
+  :<|> otherApi i
 
 unprotected :: ServerT UnProtected AppM
 unprotected =

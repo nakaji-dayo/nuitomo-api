@@ -11,6 +11,7 @@ import           App
 import           Auth
 import           Data.Maybe
 import           Data.Type.Map     as TM
+import           EagerLoader
 import           Entity
 import           Entity.Follow
 import           Entity.OwnerUser
@@ -19,7 +20,9 @@ import           Entity.UserImage
 import           Query             as Q
 import           Service.Exception
 import           Service.Loader
+import           Service.Util
 import           Type
+import           Util
 
 getResource q p = queryM q p >>= \case
   x:_ -> pure x
@@ -35,14 +38,15 @@ searchUser :: MonadService m => Maybe String -> m [User]
 searchUser x = queryM  (selectUserSearch x) ()
 
 createUser :: MonadService m => AccountId -> String -> String -> m ResourceId
-createUser (AccountId aid) name imageUrl = do
+createUser (AccountId aid) name imagePath = do
   uid <- getTid
   uiid <- getTid
   oid <- getTid
+  now <- getCurrentLocalTime
   let ui = UserImage
         { id = uiid
         , userId = uid
-        , url = imageUrl
+        , path = imagePath
         }
       u = User
         { id = uid
@@ -54,6 +58,7 @@ createUser (AccountId aid) name imageUrl = do
         , entryDate = ""
         , favoriteThing = ""
         , dislikeThing = ""
+        , createdAt = now
         }
       ou = OwnerUser
         { id = oid
@@ -112,3 +117,19 @@ getFollowees uid = queryM selectFollowees uid
 
 getFollowers :: MonadService m => ResourceId -> m [User]
 getFollowers uid = queryM selectFollowers uid
+
+getNotifications :: MonadService m => AccountId -> m [(Notification, User, Maybe User, Maybe Post)]
+getNotifications (AccountId uid) = queryM selectNotifications uid
+
+loadNotificationRelation (AccountId aid) xs ctx =
+  loadPostImages (Var :: Var "postImages") (mapMaybe (^. #refPostId) $ fmap fst4 xs) ctx
+  ->> loadPostReplies (Var :: Var "replies") [] -- TODO: ダミー。クエリ発行しないようにすべき
+  ->> loadPostLikes aid (Var :: Var "postLikes") [] -- TODO: ダミー。クエリ発行しないようにすべき
+  ->> loadUser (Var :: Var "users") ((^. #userId) <$> mapMaybe fth4 xs)
+  ->>= (\us -> loadUserRelation (fmap snd4 xs ++ us))
+
+  -- -- (ps, ctx'') <- loadPostReplies (Var :: Var "replies") (mapMaybe (^. #refPostId) xs) ctx'
+  -- let ps' = xs ++ ps
+  -- loadPostImages (Var :: Var "postImages") ((^. #id) <$> ps') ctx''
+  --   ->> loadUser (Var :: Var "users") ((^. #userId) <$> ps')
+  --   ->>=loadUserRelation

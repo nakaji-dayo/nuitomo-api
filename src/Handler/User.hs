@@ -3,10 +3,13 @@ module Handler.User where
 
 import           App
 import           Auth
+import           Data.Maybe
 import           Data.Type.Map      as TM
 import           Handler.Middleware
+import           Service.Post
 import           Service.User
 import           Type               as T
+import           Util
 import           View
 
 loadRenderUsers xs =  do
@@ -43,3 +46,11 @@ getFollowersR _ uid = getFollowers uid >>= loadRenderUsers
 
 patchUserR :: AccountId -> ResourceId -> UpdateUserRequest -> AppM ()
 patchUserR = updateUser
+
+getNotificationsR :: AccountId -> AppM [GetNotification]
+getNotificationsR a = do
+  ns <- getNotifications a
+  liftIO $ print $ (mapMaybe third4 ns) ++ (fmap snd4 ns)
+  -- poad post内のload userで最初のload userの内容が失われている気がする
+  c <- snd <$> loadNotificationRelation a ns TM.Empty
+  runViewM $ mapM (renderNotification c) ns

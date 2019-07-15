@@ -60,6 +60,13 @@ packages:
   original:
     git: https://github.com/nakaji-dayo/monad-mock.git
     commit: 48fc0db542829881d2f5bcc330ae45dfd76cdb38
+- completed:
+    hackage: extend-record-data-th-0.1.0.2@sha256:10b6e74b3ad325fa87cbfebafd8cef699516f0da2c841a3c73c0a100fc5eb928,1607
+    pantry-tree:
+      size: 384
+      sha256: c5f133de2e03791482cb8aa80b5760136b03985cc89853ed59eb7207bb5be3f1
+  original:
+    hackage: extend-record-data-th-0.1.0.2
 snapshots:
 - completed:
     size: 498186

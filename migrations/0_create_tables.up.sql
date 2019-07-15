@@ -9,6 +9,8 @@ create table "user" (
   entry_date text not null,
   favorite_thing text not null,
   dislike_thing text not null,
+  --
+  created_at timestamp not null,
   primary key (id)
 );
 
@@ -23,7 +25,7 @@ create table owner_user (
 create table user_image (
   id bigint not null,
   user_id bigint references "user"(id) not null,
-  url text not null,
+  path text not null,
   primary key (id)
 );
 
@@ -33,13 +35,14 @@ create table post (
   body text not null,
   reply_to bigint references "post"(id),
   mention_to bigint references "user"(id), -- 当面はbotのみが利用
+  created_at timestamp not null,
   primary key (id)
 );
 
 create table post_image (
   id bigint not null,
   post_id bigint references "post"(id) not null,
-  url text not null,
+  path text not null,
   primary key (id)
 );
 
@@ -55,6 +58,7 @@ create table "like" (
   id bigint not null,
   post_id bigint references "post"(id) not null,
   user_id bigint references "user"(id) not null,
+  created_at timestamp not null,
   unique (post_id, user_id),
   primary key (id)
 );
@@ -64,9 +68,16 @@ create table report (
   category smallint not null,
   user_id bigint references "user"(id) not null,
   target_user_id bigint references "user"(id) not null,
+  created_at timestamp not null,
   primary key (id)
 );
 
 create table notification (
-
+  id bigint not null,
+  user_id bigint references "user"(id) not null,
+  notification_type smallint not null,
+  ref_user_id bigint references "user"(id),
+  ref_post_id bigint references "post"(id),
+  created_at timestamp not null,
+  primary key (id)
 );
