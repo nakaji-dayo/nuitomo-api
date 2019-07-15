@@ -16,7 +16,7 @@ module Type (
   -- , name -- 明示的に指定しないと、何故かexportされない。バグ?
   ) where
 
-import           Control.Lens       ((^.))
+import           Control.Lens       (view, (^.))
 import           Data.Int           (Int64)
 import           Data.Record.Extend
 import           Data.Time
@@ -68,6 +68,11 @@ data CreateUserRequest = CreateUserRequest
  } deriving (Show, Generic, Eq)
 $(deriveApiField ''CreateUserRequest)
 
+data GetLike = GetLike
+ { userId  :: ResourceId
+ } deriving (Show, Generic, Eq)
+$(deriveApiField ''GetLike)
+
 data PostResponse = PostResponse
   { id        :: ResourceId
   , body      :: String
@@ -75,6 +80,8 @@ data PostResponse = PostResponse
   , images    :: [String]
   , replyToId :: Maybe ResourceId
   , replies   :: [PostResponse]
+  , createdAt :: LocalTime
+  , ownLikes  :: [GetLike]
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''PostResponse)
 
@@ -99,7 +106,27 @@ data UpdateUserRequest = UpdateUserRequest
  deriving (Show, Generic, Eq)
 $(deriveApiField ''UpdateUserRequest)
 
-data CreateFollowRequest= CreateFollowRequest
+data CreateFollowRequest = CreateFollowRequest
   { toUserId  :: ResourceId
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''CreateFollowRequest)
+
+data NotificationType = NotifyReply | NotifyFollow | NotifyLike
+  deriving (Eq, Show, Generic, Enum, Bounded, Read)
+$(deriveApiFieldSumType ''NotificationType 'NotifyReply)
+
+data GetNotification = GetNotification
+  { id               :: ResourceId
+  , user             :: UserResponse
+  , notificationType :: NotificationType
+  , refUser          :: Maybe UserResponse
+  , refPost          :: Maybe PostResponse
+  } deriving (Show, Generic, Eq)
+$(deriveApiField ''GetNotification)
+
+
+data CreateLikeRequest = CreateLikeRequest
+  { userId :: ResourceId
+  , postId :: ResourceId
+  } deriving (Show, Generic, Eq)
+$(deriveApiField ''CreateLikeRequest)

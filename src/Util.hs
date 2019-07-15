@@ -47,6 +47,9 @@ snd4 (_, a, _, _) = a
 third4 :: (a, b, c, d) -> c
 third4 (_, _, a, _) = a
 
+fth4 :: (a, b, c, d) -> d
+fth4 (_, _, _, a) = a
+
 -- |
 -- construct Data.Map from List.
 -- the value of duplicated key is to be list.
