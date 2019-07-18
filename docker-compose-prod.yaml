@@ -1,0 +1,66 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:10.3
+    environment:
+      POSTGRES_USER: api
+      POSTGRES_PASSWORD: passwd
+      POSTGRES_DB: nuitomo-api
+    volumes:
+      - ./data-nuitomo/postgres:/var/lib/postgresql/data
+    command: -c fsync=off
+
+  api:
+    image: asia.gcr.io/nuitomo-c4587/nuitomo-api:latest
+    restart: always
+    environment:
+      VIRTUAL_HOST: api.nuitomo.app
+      LETSENCRYPT_HOST: api.nuitomo.app
+      LETSENCRYPT_EMAIL: nakaji.dayo@gmail.com
+      POSTGRES_HOST: postgres
+      DEPLOY_ENV: Production
+    links:
+      - postgres
+    expose:
+      - "8080"
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /data/certs:/etc/nginx/certs:ro
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+    labels:
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
+
+  letsencrypt-nginx-proxy-companion:
+    restart: always
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    volumes:
+      - /data/certs:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+
+  migrate:
+    image: asia.gcr.io/nuitomo-c4587/nuitomo-api-migrate:latest
+    restart: "no"
+    environment:
+      POSTGRES_HOST: postgres
+    links:
+      - postgres
+    command: "-path migrations/ -database postgres://api:passwd@postgres:5432/nuitomo-api?sslmode=disable up"
+
+volumes:
+  vhost:
+  html:
+
+networks:
+  default:
+    external:
+      name: nginx-proxy
