@@ -72,7 +72,7 @@ library:
   - unordered-containers
 
 executables:
-  nuitomo-api-api:
+  nuitomo-api:
     main: Main.hs
     source-dirs: app/api
     ghc-options:
