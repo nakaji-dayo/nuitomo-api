@@ -1,0 +1,108 @@
+body {
+  font-size: 16px;
+}
+
+.Page {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.Page__head {
+}
+.Signboard {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  padding: 32px 16px;
+  background: #9EE323;
+}
+.Signboard__head {
+  width: 88px;
+  height: 88px;
+  margin: 0 32px 0 0;
+  border-radius: 16px;
+  border: 1px solid #fff;
+  overflow: hidden;
+}
+.Signboard__head > img {
+  width: 100%;
+}
+.Signboard__body {
+  margin: 0;
+  line-height: 1.2;
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.Page__body {
+}
+
+.User {
+  display: flex;
+  margin: 8px 0 16px 0;
+}
+.User--rep {
+  flex-direction: row-reverse;
+  margin: 16px 0px 16px 64px;
+}
+
+.User__head {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  margin: 0 8px;
+}
+
+.avatar {
+  background-color: #f0f0f0;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 50%;
+}
+.avatar--lobo {
+  border-radius: 4px;
+}
+
+.User__body {
+  flex-grow: 1;
+}
+.Voice {}
+.Voice__head {
+  line-height: 1;
+  font-weight: bold;
+  margin: 0 0 4px 2px;
+}
+.Voice__body {}
+
+.baloon {
+  position: relative;
+  padding: 16px;
+  border-radius: 4px;
+  background: #F8F8F8;
+}
+.baloon::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 8px;
+  left: -4px;
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-right: 4px solid #F8F8F8;
+}
+.User--rep .baloon::before {
+  left: auto;
+  right: -4px;
+  transform: rotate(180deg);
+}
+
+.note {
+  font-size: 92%;
+  color: #555;
+  margin: 16px;
+}
