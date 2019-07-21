@@ -15,6 +15,12 @@ getPostsR aid muid = do
   c <- snd <$> loadPostsRelation aid xs TM.Empty
   runViewM $ mapM (renderPost c) xs
 
+getPostR :: AccountId -> ResourceId -> AppM PostResponse
+getPostR aid pid = do
+  x <- getPost pid
+  c <- snd <$> loadPostsRelation aid [x] TM.Empty
+  runViewM $ renderPost c x
+
 postPostsR :: AccountId -> CreatePostRequest -> AppM ResourceId
 postPostsR i req =
   createPost i (req ^. #userId) (req ^. #body) (req ^. #images) (req ^. #replyTo)

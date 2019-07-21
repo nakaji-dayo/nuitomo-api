@@ -74,14 +74,16 @@ data GetLike = GetLike
 $(deriveApiField ''GetLike)
 
 data PostResponse = PostResponse
-  { id        :: ResourceId
-  , body      :: String
-  , user      :: UserResponse
-  , images    :: [String]
-  , replyToId :: Maybe ResourceId
-  , replies   :: [PostResponse]
-  , createdAt :: LocalTime
-  , ownLikes  :: [GetLike]
+  { id         :: ResourceId
+  , body       :: String
+  , user       :: UserResponse
+  , images     :: [String]
+  , replyToId  :: Maybe ResourceId
+  , replies    :: [PostResponse]
+  , createdAt  :: LocalTime
+  , ownLikes   :: [GetLike]
+  , likeCount  :: Int64
+  , replyCount :: Int64
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''PostResponse)
 
