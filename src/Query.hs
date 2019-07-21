@@ -8,14 +8,15 @@
 
 module Query where
 
--- import           Data.Int
 import           Control.Monad
 import           Data.Functor.ProductIsomorphic.Class
-import           Database.Record.Persistable          (PersistableWidth)
+import           Database.Record.Persistable              (PersistableWidth)
 import           Database.Relational
-import           Entity                               as E
+import           Database.Relational.OverloadedProjection (HasProjection)
+import           Entity                                   as E
+import           Entity.Post                              as Post
 import           Query.Util
-import           Type                                 as T
+import           Type                                     as T
 
 -- selectUser' :: Query Int64 User
 -- selectUser' = relationalQuery' r []
@@ -33,7 +34,13 @@ import           Type                                 as T
 --       wheres $ t ! #userId .=. ph
 --       pure t
 
+q :: QuerySimple (Record Flat r) -> Query () r
 q x = relationalQuery' (relation x) []
+
+q' ::
+  (PersistableWidth p, SqlContext c) =>
+  (Record c p -> Orderings Flat QueryCore (Record Flat r))
+  -> Query p r
 q' x = relationalQuery' (relation'. placeholder $ x) []
 
 selectUsers :: Query String User
@@ -104,6 +111,8 @@ deleteFollow = delete $ \proj ->
     wheres $ (proj :: Record Flat Follow) ! #userId .=. (ph ! fst')
     wheres $ proj ! #toUserId .=. (ph ! snd')
 
+selectNotifications ::
+  Query String (Notification, User, Maybe User, Maybe Post)
 selectNotifications = q' $ \ph -> do
   n <- query notification
   ou <- query ownerUser
@@ -124,6 +133,36 @@ deleteLike = delete $ \proj ->
     wheres $ (proj :: Record Flat Like) ! #userId .=. (ph ! fst')
     wheres $ proj ! #postId .=. (ph ! snd')
 
+countLike :: Update ResourceId
+countLike = update $ \proj -> do
+  fmap fst $  placeholder $ \ph -> do
+    ts <- queryScalar $ aggregatedUnique ( relation $ do
+                                             l <- query E.like
+                                             wheres $ l ! #postId .=. proj ! #id
+                                             return $ l ! #id
+                                         ) Database.Relational.id' count
+    Post.aggLikeCount' <-# fromMaybe' (value 0) ts
+    wheres $ proj ! #id .=. ph
+
+countReply :: Update ResourceId
+countReply = update $ \proj -> do
+  fmap fst $  placeholder $ \ph -> do
+    ts <- queryScalar $ aggregatedUnique ( relation $ do
+                                             p <- query E.post
+                                             wheres $ p ! #replyTo .=. just (proj ! #id)
+                                             wheres $ isJust (p ! #replyTo)
+                                             return $ p ! #id
+                                         ) Database.Relational.id' count
+    Post.aggReplyCount' <-# fromMaybe' (value 0) ts
+    wheres $ proj ! #id .=. ph
+
+fromMaybe' :: SqlContext c => Record c a -> Record c (Maybe a) -> Record c a
+fromMaybe' d m = unsafeProjectSql $ "COALESCE(" <> unsafeShowSql m <> ", " <> unsafeShowSql d <>")"
+
+include ::
+  (HasProjection "id" b a,
+   PersistableWidth b, LiteralSQL a, Num a) =>
+  Relation () b -> [a] -> Relation () (a, b)
 include e ids = relation $ do
   r <- query e
   wheres $ r ! #id `in'` values' ids
@@ -162,6 +201,7 @@ make1NInclude t1 c1 t2 c2 k ordC ids = relation $ do
 includeUserImages :: [ResourceId] -> Relation () (ResourceId, UserImage)
 includeUserImages = makeInclude userImage #userId
 
+includePostImages :: [ResourceId] -> Relation () (ResourceId, PostImage)
 includePostImages = makeInclude postImage #postId
 
 includePostReplies
@@ -176,6 +216,7 @@ includePostReplies ids = relation $ do
     values'' [] = values [Just (-1)]
     values'' xs = values xs
 
+includePostLikes :: String -> [ResourceId] -> Relation () (ResourceId, Like)
 includePostLikes aid ids = relation $ do
   l <- query E.like
   ou <- query ownerUser

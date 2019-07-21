@@ -50,7 +50,5 @@ patchUserR = updateUser
 getNotificationsR :: AccountId -> AppM [GetNotification]
 getNotificationsR a = do
   ns <- getNotifications a
-  liftIO $ print $ (mapMaybe third4 ns) ++ (fmap snd4 ns)
-  -- poad post内のload userで最初のload userの内容が失われている気がする
   c <- snd <$> loadNotificationRelation a ns TM.Empty
   runViewM $ mapM (renderNotification c) ns

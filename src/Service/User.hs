@@ -10,16 +10,17 @@ module Service.User where
 import           App
 import           Auth
 import           Data.Maybe
-import           Data.Type.Map     as TM
+import           Data.Type.Map        as TM
 import           EagerLoader
 import           Entity
 import           Entity.Follow
 import           Entity.OwnerUser
-import           Entity.User       as E
+import           Entity.User          as E
 import           Entity.UserImage
-import           Query             as Q
+import           Query                as Q
 import           Service.Exception
 import           Service.Loader
+import           Service.Notification
 import           Service.Util
 import           Type
 import           Util
@@ -103,7 +104,9 @@ createFollow a uid toUid = do
         , userId = uid
         , toUserId = toUid
         }
-  insertM insertFollow f
+  runTransactionM $ do
+    insertM insertFollow f
+    createNotification  toUid NotifyFollow (Just uid) Nothing
   pure ()
 
 deleteFollow a uid toUid = do
@@ -125,11 +128,5 @@ loadNotificationRelation (AccountId aid) xs ctx =
   loadPostImages (Var :: Var "postImages") (mapMaybe (^. #refPostId) $ fmap fst4 xs) ctx
   ->> loadPostReplies (Var :: Var "replies") [] -- TODO: ダミー。クエリ発行しないようにすべき
   ->> loadPostLikes aid (Var :: Var "postLikes") [] -- TODO: ダミー。クエリ発行しないようにすべき
-  ->> loadUser (Var :: Var "users") ((^. #userId) <$> mapMaybe fth4 xs)
+  ->> loadUser (Var :: Var "users") (((^. #userId) <$> mapMaybe fth4 xs) ++ (mapMaybe (^. #refUserId) (fmap fst4 xs)))
   ->>= (\us -> loadUserRelation (fmap snd4 xs ++ us))
-
-  -- -- (ps, ctx'') <- loadPostReplies (Var :: Var "replies") (mapMaybe (^. #refPostId) xs) ctx'
-  -- let ps' = xs ++ ps
-  -- loadPostImages (Var :: Var "postImages") ((^. #id) <$> ps') ctx''
-  --   ->> loadUser (Var :: Var "users") ((^. #userId) <$> ps')
-  --   ->>=loadUserRelation

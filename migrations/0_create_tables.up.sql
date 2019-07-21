@@ -36,6 +36,8 @@ create table post (
   reply_to bigint references "post"(id),
   mention_to bigint references "user"(id), -- 当面はbotのみが利用
   created_at timestamp not null,
+  agg_like_count bigint not null,
+  agg_reply_count bigint not null,
   primary key (id)
 );
 

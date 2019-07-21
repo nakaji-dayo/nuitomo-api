@@ -46,6 +46,8 @@ renderPost c p = do
       , replyToId = p ^. #replyTo
       , createdAt = p ^. #createdAt
       , ownLikes =  vLikes
+      , likeCount = p ^. #aggLikeCount
+      , replyCount = p ^. #aggReplyCount
       }
 
 renderUser :: (IsMember

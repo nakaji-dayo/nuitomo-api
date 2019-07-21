@@ -34,12 +34,15 @@ import           Debug.Trace
 
 type PostAPI =
   Summary "List posts" :> "posts" :> QueryParam "uid" ResourceId :> Get '[JSON] [PostResponse]
+  :<|> Summary "detail posts" :> "posts" :> Capture "id" ResourceId :> Get '[JSON] PostResponse
   :<|> Summary "Create Post" :> "posts" :> ReqBody '[JSON] CreatePostRequest :> Post '[JSON] ResourceId
   :<|> "likes" :> ReqBody '[JSON] CreateLikeRequest :> Post '[JSON] ResourceId
   :<|> "likes" :> ReqBody '[JSON] CreateLikeRequest :> Delete '[JSON] ()
 
 postApi :: AccountId -> ServerT PostAPI AppM
-postApi au = getPostsR au :<|> postPostsR au
+postApi au = getPostsR au
+  :<|> getPostR au
+  :<|> postPostsR au
   :<|> postLikesR au
   :<|> deleteLikesR au
 
