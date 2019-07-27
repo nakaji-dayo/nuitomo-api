@@ -25,12 +25,14 @@ import           Service.User
 import           Service.Util
 import           Type
 
-getPosts :: MonadService m => AccountId -> Maybe ResourceId -> m [Post]
-getPosts aid muid = do
+getPosts :: MonadService m => AccountId -> Maybe ResourceId -> Maybe String -> m [Post]
+getPosts aid muid mscope = do
   uids <- case muid of
     Nothing -> do
       uids <- queryM selectUserIds (unAccountId aid)
-      uids' <- queryM selectOwnerFollowees (unAccountId aid)
+      uids' <- case mscope of
+        Just "home" -> pure []
+        _           -> queryM selectOwnerFollowees (unAccountId aid)
       pure $ uids ++ uids'
     Just x -> pure [x]
   queryM (selectPosts uids) ()

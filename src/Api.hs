@@ -33,7 +33,7 @@ import           Debug.Trace
 --   toSwagger Proxy = toSwagger $ Proxy @api
 
 type PostAPI =
-  Summary "List posts" :> "posts" :> QueryParam "uid" ResourceId :> Get '[JSON] [PostResponse]
+  Summary "List posts" :> "posts" :> QueryParam "uid" ResourceId :> QueryParam "scope" String :> Get '[JSON] [PostResponse]
   :<|> Summary "detail posts" :> "posts" :> Capture "id" ResourceId :> Get '[JSON] PostResponse
   :<|> Summary "Create Post" :> "posts" :> ReqBody '[JSON] CreatePostRequest :> Post '[JSON] ResourceId
   :<|> "likes" :> ReqBody '[JSON] CreateLikeRequest :> Post '[JSON] ResourceId
@@ -82,6 +82,7 @@ otherApi au = getNotificationsR au
 type UnProtected =
   Tags "System" :>
   ( Summary "version" :> "_version" :> Get '[JSON] String
+    :<|> "_twitter_redirect" :> Get '[JSON] ()
   )
 
 type API = Protected :> Protected'
@@ -102,7 +103,8 @@ unprotected :: ServerT UnProtected AppM
 unprotected =
   systemAPI
   where
-    systemAPI = getVersionR
+    systemAPI = getVersionR :<|> twRedirect
+    twRedirect = throwError $ err301 { errHeaders = [("Location", "exp://192.168.100.117:19000/")] }
 
 server :: ServerT API AppM
 server = protected :<|> unprotected

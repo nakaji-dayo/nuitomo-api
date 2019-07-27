@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: passwd
       POSTGRES_DB: nuitomo-api
     volumes:
-      - ./data-nuitomo/postgres:/var/lib/postgresql/data
+      - /data-nuitomo/postgres:/var/lib/postgresql/data
     command: -c fsync=off
 
   api:
