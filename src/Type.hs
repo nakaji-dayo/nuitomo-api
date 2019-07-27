@@ -45,6 +45,7 @@ data UserResponse = UserResponse
   { id     :: ResourceId
   , name   :: String
   , images :: [String]
+  , bio    :: String
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''UserResponse)
 

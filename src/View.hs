@@ -60,6 +60,7 @@ renderUser c x = do
     { id = x ^. #id
     , name = x ^. #name
     , images = isV
+    , bio = x ^. #bio
     }
 
 renderDetailUser :: (IsMember

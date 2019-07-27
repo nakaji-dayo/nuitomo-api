@@ -2,7 +2,7 @@ DBURL="postgres://api:passwd@localhost:5432/nuitomo-api?sslmode=disable"
 DEFAULT_BUILD_OPTS="-j -Wall -Werror"
 FAST_BUILD_OPTS="-j -Wall"
 
-OPTIMIZED_BUILD_OPTS="-j -Wall -Werror -O1"
+OPTIMIZED_BUILD_OPTS="-j -Wall -O1"
 
 TARGET=api
 
