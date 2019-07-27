@@ -82,8 +82,14 @@ otherApi au = getNotificationsR au
 type UnProtected =
   Tags "System" :>
   ( Summary "version" :> "_version" :> Get '[JSON] String
-    :<|> "_twitter_redirect" :> Get '[JSON] ()
+    :<|> "_twitter_redirect" :> QueryParam "link_to" String :> QueryParam "oauth_token" String :> QueryParam "oauth_verifier" String :> Get '[JSON] ()
   )
+
+unprotected :: ServerT UnProtected AppM
+unprotected =
+  systemAPI
+  where
+    systemAPI = getVersionR :<|> getTwitterRedirectR
 
 type API = Protected :> Protected'
   :<|> UnProtected
@@ -98,13 +104,6 @@ protected i =
   postApi i
   :<|> userApi i
   :<|> otherApi i
-
-unprotected :: ServerT UnProtected AppM
-unprotected =
-  systemAPI
-  where
-    systemAPI = getVersionR :<|> twRedirect
-    twRedirect = throwError $ err301 { errHeaders = [("Location", "exp://192.168.100.117:19000/")] }
 
 server :: ServerT API AppM
 server = protected :<|> unprotected
