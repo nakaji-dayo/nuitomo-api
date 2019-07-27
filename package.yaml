@@ -1,3 +1,29 @@
+name: nuitomo-api
+version: '0.1.0.0'
+category: Web
+author: Author name here
+maintainer: example@example.com
+copyright: 2018 Author name here
+license: BSD3
+github: githubuser/nuitomo-api
+extra-source-files:
+- README.md
+dependencies:
+- base >=4.7 && <5
+- aeson
+- containers
+- data-default-class
+- lens
+- servant-server
+- text
+- katip
+- mtl
+- relational-query
+- monad-control
+- exceptions
+- transformers-base
+- time
+- extend-record-data-th
 
 library:
   source-dirs: src
