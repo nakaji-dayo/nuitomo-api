@@ -82,7 +82,7 @@ selectUser = q' $ \ph -> do
   u <- query E.user
   ou <- queryMaybe ownerUser
   on $ just (u ! #id) .=. ou ?! #userId
-  wheres $ ou ?! #ownerId .=. just (ph ! fst')
+    `and'` ou ?! #ownerId .=. just (ph ! fst')
   wheres $ u ! #id .=. ph ! snd'
   pure $ u >< ou
 
