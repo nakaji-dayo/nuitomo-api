@@ -42,8 +42,9 @@ deleteFollowsR a u r = deleteFollow (unAccountId a) u (r ^. #toUserId)
 getFolloweesR :: AccountId -> ResourceId -> AppM [UserResponse]
 getFolloweesR _ uid = getFollowees uid >>= loadRenderUsers
 
-getFollowersR :: AccountId -> ResourceId -> AppM [UserResponse]
-getFollowersR _ uid = getFollowers uid >>= loadRenderUsers
+getFollowersR :: AccountId -> ResourceId -> Maybe String -> AppM [UserResponse]
+getFollowersR aid uid (Just "home") = getFollowers (Just aid) uid >>= loadRenderUsers
+getFollowersR _ uid _        = getFollowers Nothing uid >>= loadRenderUsers
 
 patchUserR :: AccountId -> ResourceId -> UpdateUserRequest -> AppM ()
 patchUserR = updateUser

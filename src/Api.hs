@@ -33,7 +33,7 @@ import           Debug.Trace
 --   toSwagger Proxy = toSwagger $ Proxy @api
 
 type PostAPI =
-  Summary "List posts" :> "posts" :> QueryParam "uid" ResourceId :> QueryParam "scope" String :> Get '[JSON] [PostResponse]
+  Summary "List posts" :> "posts" :> QueryParam "uid" ResourceId :> QueryParam "cursor" ResourceId :> QueryParam "scope" String :> Get '[JSON] [PostResponse]
   :<|> Summary "detail posts" :> "posts" :> Capture "id" ResourceId :> Get '[JSON] PostResponse
   :<|> Summary "Create Post" :> "posts" :> ReqBody '[JSON] CreatePostRequest :> Post '[JSON] ResourceId
   :<|> "likes" :> ReqBody '[JSON] CreateLikeRequest :> Post '[JSON] ResourceId
@@ -56,7 +56,7 @@ type UserAPI =
   :<|> Capture "id" ResourceId :> "follows" :> Summary "Create Follow" :> ReqBody '[JSON] CreateFollowRequest :> Post '[JSON] ()
   :<|> Capture "id" ResourceId :> "follows" :> Summary "Delete Follow" :> ReqBody '[JSON] CreateFollowRequest :> Delete '[JSON] ()
   :<|> Capture "id" ResourceId :> "followees" :> Summary "List Followee" :> Get '[JSON] [UserResponse]
-  :<|> Capture "id" ResourceId :> "followers" :> Summary "List Follower" :> Get '[JSON] [UserResponse]
+  :<|> Capture "id" ResourceId :> "followers" :> Summary "List Follower" :> QueryParam "scope" String :> Get '[JSON] [UserResponse]
   :<|> Capture "id" ResourceId :> "owners" :> Get '[JSON] [OwnerResponse]
   :<|> Capture "id" ResourceId :> "owners" :> ReqBody '[JSON] String :> Post '[JSON] ()
   )

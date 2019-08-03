@@ -86,7 +86,6 @@ selectUser = q' $ \ph -> do
   wheres $ u ! #id .=. ph ! snd'
   pure $ u >< ou
 
-
 selectUsers :: Query String User
 selectUsers =  q' $ \ph -> do
   u <- query E.user
@@ -111,11 +110,15 @@ selectOwnerFollowees =  q' $ \ph -> do
   wheres $ ou ! #ownerId .=. ph
   pure $ f ! #toUserId
 
-selectFollowers :: Query ResourceId User
-selectFollowers =  q' $ \ph -> do
+selectFollowers :: Maybe String -> Query ResourceId User
+selectFollowers maid =  q' $ \ph -> do
   u <- query E.user
   f <- query follow
   on $ u ! #id .=. f ! #userId
+  forM maid $ \aid -> do
+    ou <- query ownerUser
+    on $ ou ! #userId .=. u ! #id
+    wheres $ ou ! #ownerId .=. value aid
   wheres $ f ! #toUserId .=. ph
   pure u
 
@@ -140,14 +143,23 @@ selectUserIds =  q' $ \ph -> do
   wheres $ ou ! #ownerId .=. ph
   pure $ ou ! #userId
 
-selectPosts :: [ResourceId] -> Query () Post
-selectPosts uids = q $ do
-  p <- query post
-  wheres $ p ! #userId `in'` values' uids
-  wheres $ isNothing (p ! #replyTo)
-  desc $ p ! #id
-  pure p
+selectUserImages :: Query ResourceId UserImage
+selectUserImages = q' $ \ph -> do
+  ui <- query userImage
+  wheres $ ui ! #userId .=. ph
+  pure ui
 
+selectPosts :: [ResourceId] -> Maybe ResourceId -> Query () Post
+selectPosts uids mcursor = relationalQuery' (relation r) (limit' 40)
+  where
+    r = do
+      p <- query post
+      wheres $ p ! #userId `in'` values' uids
+      wheres $ isNothing (p ! #replyTo)
+      forM mcursor $ \cursor -> do
+        wheres $ p ! #id .<. value cursor
+      desc $ p ! #id
+      pure p
 
 deleteFollow :: Delete (ResourceId, ResourceId)
 deleteFollow = delete $ \proj ->
