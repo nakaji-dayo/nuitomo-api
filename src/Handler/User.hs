@@ -6,6 +6,7 @@ import           Auth
 import           Data.Maybe
 import           Data.Type.Map      as TM
 import           Handler.Middleware
+import           Service.Owner
 import           Service.Post
 import           Service.User
 import           Type               as T
@@ -23,9 +24,9 @@ getUsersSearchR :: AccountId -> Maybe String -> AppM [UserResponse]
 getUsersSearchR _ q = searchUser q >>= loadRenderUsers
 
 getUserR :: AccountId -> ResourceId -> AppM DetailUserResponse
-getUserR _ uid = do
-  x <- getUser uid
-  loaded <- snd <$> loadUserRelation [x] TM.Empty
+getUserR (AccountId aid) uid = do
+  x <- getUser aid uid
+  loaded <- snd <$> loadUserRelation [fst x] TM.Empty
   runViewM $ renderDetailUser loaded x
 
 postUsersR :: AccountId -> CreateUserRequest ->  AppM ResourceId
@@ -52,3 +53,20 @@ getNotificationsR a = do
   ns <- getNotifications a
   c <- snd <$> loadNotificationRelation a ns TM.Empty
   runViewM $ mapM (renderNotification c) ns
+
+getMeR :: AccountId -> AppM MeResponse
+getMeR a =
+  MeResponse <$> getOwnerKey (unAccountId a)
+
+getOwnersR :: AccountId -> ResourceId -> AppM [OwnerResponse]
+getOwnersR (AccountId a) uid = do
+  xs <- getOwners a uid
+  runViewM $ mapM renderOwnerResponse xs
+
+postOwnersR :: AccountId -> ResourceId -> String -> AppM ()
+postOwnersR (AccountId a) u k = do
+  liftIO $ putStrLn "test"
+  addOwner a u k
+
+deleteOwnersR :: AccountId -> ResourceId -> AppM ()
+deleteOwnersR (AccountId a) = deleteOwner a

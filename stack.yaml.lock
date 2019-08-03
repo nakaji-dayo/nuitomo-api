@@ -67,6 +67,13 @@ packages:
       sha256: c5f133de2e03791482cb8aa80b5760136b03985cc89853ed59eb7207bb5be3f1
   original:
     hackage: extend-record-data-th-0.1.0.2
+- completed:
+    hackage: base58-bytestring-0.1.0@sha256:a1da72ee89d5450bac1c792d9fcbe95ed7154ab7246f2172b57bd4fd9b5eab79,1913
+    pantry-tree:
+      size: 419
+      sha256: 053784f8edef6433518c873a7c502dc75348f812e2384e1306f90467ea54f40b
+  original:
+    hackage: base58-bytestring-0.1.0@sha256:a1da72ee89d5450bac1c792d9fcbe95ed7154ab7246f2172b57bd4fd9b5eab79,1913
 snapshots:
 - completed:
     size: 498186

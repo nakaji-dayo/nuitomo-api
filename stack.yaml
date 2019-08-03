@@ -49,6 +49,7 @@ extra-deps:
 - git: https://github.com/nakaji-dayo/monad-mock.git
   commit: 48fc0db542829881d2f5bcc330ae45dfd76cdb38
 - extend-record-data-th-0.1.0.2
+- base58-bytestring-0.1.0@sha256:a1da72ee89d5450bac1c792d9fcbe95ed7154ab7246f2172b57bd4fd9b5eab79,1913
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

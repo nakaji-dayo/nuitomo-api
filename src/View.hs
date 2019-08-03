@@ -10,6 +10,7 @@ import           App
 import           Control.Lens
 import           Data.Default.Class
 import           Data.Generics.Product.Subtype
+import           Data.Maybe
 import           Data.Type.Map                 as TM
 import           Entity
 import           Service.Loader
@@ -65,8 +66,8 @@ renderUser c x = do
 
 renderDetailUser :: (IsMember
                 "userImages" UserImagesMap c
-              ) => Map c -> User -> ViewM DetailUserResponse
-renderDetailUser c x = do
+              ) => Map c -> (User, Maybe OwnerUser) -> ViewM DetailUserResponse
+renderDetailUser c (x, mou) = do
   u <- renderUser c x
   return $ smash u (def :: DetailUserResponse)
     { bio = x ^. #bio
@@ -76,6 +77,8 @@ renderDetailUser c x = do
     , entryDate = x ^. #entryDate
     , favoriteThing = x ^. #favoriteThing
     , dislikeThing = x ^. #dislikeThing
+    , ownUser = isJust mou
+    , isPrimary = maybe False (view #isPrimary) mou
     }
 
 renderImage x = return $ x ^. #path
@@ -97,3 +100,11 @@ renderNotification c (x, u, mu, mp) = do
     , refUser = vru
     , refPost = vp
     }
+
+renderOwnerResponse :: (OwnerKey, OwnerUser) -> ViewM OwnerResponse
+renderOwnerResponse (ok, ou) = pure $
+  OwnerResponse
+  { id = (ou ^. #id)
+  , key = (ok ^. #key)
+  , isPrimary = (ou ^. #isPrimary)
+  }

@@ -38,6 +38,10 @@ data Gender = Male | Female
   deriving (Eq, Show, Generic, Enum, Bounded, Read)
 $(deriveApiFieldSumType ''Gender 'Male)
 
+data MeResponse = MeResponse
+  {  key :: String
+  } deriving (Show, Generic, Eq)
+$(deriveApiField ''MeResponse)
 
 type Tag = String
 
@@ -57,6 +61,8 @@ data UserDetail= UserDetail
   , entryDate     :: String
   , favoriteThing :: String
   , dislikeThing  :: String
+  , ownUser       :: Bool
+  , isPrimary     :: Bool
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''UserDetail)
 
@@ -133,3 +139,10 @@ data CreateLikeRequest = CreateLikeRequest
   , postId :: ResourceId
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''CreateLikeRequest)
+
+data OwnerResponse = OwnerResponse
+  { id        :: ResourceId
+  , key       :: String
+  , isPrimary :: Bool
+  } deriving (Show, Generic, Eq)
+$(deriveApiField ''OwnerResponse)

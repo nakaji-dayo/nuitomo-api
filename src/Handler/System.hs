@@ -11,6 +11,8 @@ import           Service.Git
 getVersionR :: AppM String
 getVersionR = pure getVersion
 
-getTwitterRedirectR (Just lt) (Just oat) (Just oav) = throwError $ err301 { errHeaders = [("Location", pack lt <> qs)] }
+getTwitterRedirectR (Just lt) (Just oat) (Just oav) = do
+  liftIO $ print ("redirect", lt)
+  throwError $ err301 { errHeaders = [("Location", pack lt <> qs)] }
   where qs = "?oauth_token=" <> pack  oat <> "&oauth_verifier=" <> pack oav
 getTwitterRedirectR _ _ _ = throwError err400

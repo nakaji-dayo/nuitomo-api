@@ -27,7 +27,6 @@ import qualified Data.Text                                  as T
 import qualified Data.Text.Encoding                         as T
 import           Data.Word8                                 (isSpace, toLower)
 import qualified Data.X509                                  as X509
-import           Debug.Trace
 import qualified Network.HTTP.Client                        as HTTP
 import qualified Network.HTTP.Simple                        as HTTP
 import qualified Network.URI                                as URI
@@ -103,8 +102,8 @@ verifyUser settings (UnverifiedJWT jwt) = do
 
   let config =
         JWT.defaultJWTValidationSettings
-          (\sou -> Just projectId == (trace (show $ sou ^? JWT.string) sou ^? JWT.string)) & -- aud
-          JWT.issuerPredicate .~ (\sou -> Just issUri == (trace (show $ sou ^? JWT.uri) sou ^? JWT.uri)) & -- iss
+          (\sou -> Just projectId == sou ^? JWT.string) & -- aud
+          JWT.issuerPredicate .~ (\sou -> Just issUri ==  sou ^? JWT.uri) & -- iss
           JWT.allowedSkew .~ 60 * 5
   runExceptT (JWT.verifyClaims config jwk jwt) >>= \case
     Right cs ->

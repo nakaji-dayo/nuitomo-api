@@ -43,6 +43,50 @@ q' ::
   -> Query p r
 q' x = relationalQuery' (relation'. placeholder $ x) []
 
+selectPrimaryOwner :: Query (String, ResourceId) ResourceId
+selectPrimaryOwner = q' $ \ph -> do
+  ou <- query ownerUser
+  wheres $ ou ! #ownerId .=. ph ! fst'
+  wheres $ ou ! #userId .=. ph ! snd'
+  wheres $ ou ! #isPrimary .=. value True
+  pure $ ou ! #id
+
+selectOwnerKey :: Query String OwnerKey
+selectOwnerKey = q' $ \ph -> do
+  o <- query ownerKey
+  wheres $ o ! #ownerId .=. ph
+  pure o
+
+selectOwners :: Query ResourceId (OwnerKey, OwnerUser)
+selectOwners = q' $ \ph -> do
+  ou <- query ownerUser
+  o <- query ownerKey
+  on $ ou ! #ownerId .=. o ! #ownerId
+  wheres $ ou ! #userId .=. ph
+  pure $ o >< ou
+
+selectOwnerByKey :: Query String String
+selectOwnerByKey = q' $ \ph -> do
+  o <- query ownerKey
+  wheres $ o ! #key .=. ph
+  pure $ o ! #ownerId
+
+deleteOwnerUser :: Delete ResourceId
+deleteOwnerUser = delete $ \proj ->
+  fmap fst . placeholder $ \ph -> do
+    wheres $ (proj :: Record Flat OwnerUser) ! #id .=. ph
+
+selectUser
+  :: Query (String, ResourceId) (User, Maybe OwnerUser)
+selectUser = q' $ \ph -> do
+  u <- query E.user
+  ou <- queryMaybe ownerUser
+  on $ just (u ! #id) .=. ou ?! #userId
+  wheres $ ou ?! #ownerId .=. just (ph ! fst')
+  wheres $ u ! #id .=. ph ! snd'
+  pure $ u >< ou
+
+
 selectUsers :: Query String User
 selectUsers =  q' $ \ph -> do
   u <- query E.user
