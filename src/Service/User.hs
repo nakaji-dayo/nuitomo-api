@@ -8,6 +8,7 @@ module Service.User where
 
 import           App
 import           Auth
+import           Control.Monad
 import           Data.Maybe
 import           Data.Type.Map        as TM
 import           EagerLoader
@@ -80,7 +81,12 @@ updateUser (AccountId aid) uid req = do
         , favoriteThing = fromMaybe (u ^. #favoriteThing) (req ^. #favoriteThing)
         , dislikeThing = fromMaybe (u ^. #dislikeThing) (req ^. #dislikeThing)
         } :: User
-  keyUpdateM E.updateUser u'
+  runTransactionM $ do
+    forM_ (req ^. #image) $ \imagePath -> do
+      ui <- getResource selectUserImages uid
+      let ui' = ui {path = imagePath}
+      void $ keyUpdateM updateUserImage ui'
+    keyUpdateM E.updateUser u'
   pure ()
 
 
@@ -112,8 +118,8 @@ deleteFollow a uid toUid = do
 getFollowees :: MonadService m => ResourceId -> m [User]
 getFollowees uid = queryM selectFollowees uid
 
-getFollowers :: MonadService m => ResourceId -> m [User]
-getFollowers uid = queryM selectFollowers uid
+getFollowers :: MonadService m => Maybe AccountId -> ResourceId -> m [User]
+getFollowers maid uid = queryM (selectFollowers (unAccountId <$> maid)) uid
 
 getNotifications :: MonadService m => AccountId -> m [(Notification, User, Maybe User, Maybe Post)]
 getNotifications (AccountId uid) = queryM selectNotifications uid

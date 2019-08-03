@@ -9,9 +9,9 @@ import           Service.Post
 import           Type               as T
 import           View
 
-getPostsR :: AccountId -> Maybe ResourceId -> Maybe String -> AppM [PostResponse]
-getPostsR aid muid mscope = do
-  xs <- getPosts aid muid mscope
+getPostsR :: AccountId -> Maybe ResourceId -> Maybe ResourceId -> Maybe String -> AppM [PostResponse]
+getPostsR aid muid mcursor mscope = do
+  xs <- getPosts aid muid mcursor mscope
   c <- snd <$> loadPostsRelation aid xs TM.Empty
   runViewM $ mapM (renderPost c) xs
 

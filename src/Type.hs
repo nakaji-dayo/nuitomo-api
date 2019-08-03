@@ -25,7 +25,6 @@ import           GHC.Generics
 import           Instance           ()
 import           TH.Type
 
-
 type ResourceId = Int64
 
 data NameAndId = NameAndId
@@ -104,6 +103,7 @@ $(deriveApiField ''CreatePostRequest)
 
 data UpdateUserRequest = UpdateUserRequest
   { name          :: Maybe String
+  , image         :: Maybe String
   , bio           :: Maybe String
   , nickname      :: Maybe String
   , gender        :: Maybe String
