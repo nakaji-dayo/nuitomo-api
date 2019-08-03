@@ -57,6 +57,8 @@ type UserAPI =
   :<|> Capture "id" ResourceId :> "follows" :> Summary "Delete Follow" :> ReqBody '[JSON] CreateFollowRequest :> Delete '[JSON] ()
   :<|> Capture "id" ResourceId :> "followees" :> Summary "List Followee" :> Get '[JSON] [UserResponse]
   :<|> Capture "id" ResourceId :> "followers" :> Summary "List Follower" :> Get '[JSON] [UserResponse]
+  :<|> Capture "id" ResourceId :> "owners" :> Get '[JSON] [OwnerResponse]
+  :<|> Capture "id" ResourceId :> "owners" :> ReqBody '[JSON] String :> Post '[JSON] ()
   )
 
 
@@ -72,12 +74,20 @@ userApi au = (
   :<|> deleteFollowsR au
   :<|> getFolloweesR au
   :<|> getFollowersR au
+  --
+  :<|> getOwnersR au
+  :<|> postOwnersR au
   )
 
 type OtherAPI =
   "notifications" :> Get '[JSON] [GetNotification]
+  :<|> "me" :> Get '[JSON] MeResponse
+  :<|> "owners"  :> Capture "id" ResourceId :> Delete '[JSON] ()
 
-otherApi au = getNotificationsR au
+otherApi au =
+  getNotificationsR au
+  :<|> getMeR au
+  :<|> deleteOwnersR au
 
 type UnProtected =
   Tags "System" :>

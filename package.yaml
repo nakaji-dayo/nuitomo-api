@@ -70,6 +70,8 @@ library:
   - http-client
   - word8
   - unordered-containers
+  - base58-bytestring
+  - random-bytestring
 
 executables:
   nuitomo-api:

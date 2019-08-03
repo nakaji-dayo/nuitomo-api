@@ -1,7 +1,6 @@
 {-# LANGUAGE DataKinds             #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE LambdaCase            #-}
 {-# LANGUAGE OverloadedLabels      #-}
 {-# LANGUAGE TypeOperators         #-}
 
@@ -18,19 +17,14 @@ import           Entity.OwnerUser
 import           Entity.User          as E
 import           Entity.UserImage
 import           Query                as Q
-import           Service.Exception
 import           Service.Loader
 import           Service.Notification
 import           Service.Util
 import           Type
 import           Util
 
-getResource q p = queryM q p >>= \case
-  x:_ -> pure x
-  _ -> throwM ResourceNotExist
-
-getUser :: MonadService m => ResourceId -> m User
-getUser = getResource selectUser
+getUser :: MonadService m => String -> ResourceId -> m (User, Maybe OwnerUser)
+getUser = curry (getResource Q.selectUser)
 
 getUsers :: MonadService m => AccountId -> m [User]
 getUsers aid = queryM selectUsers (unAccountId aid)
