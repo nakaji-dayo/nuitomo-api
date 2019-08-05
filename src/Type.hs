@@ -80,16 +80,17 @@ data GetLike = GetLike
 $(deriveApiField ''GetLike)
 
 data PostResponse = PostResponse
-  { id         :: ResourceId
-  , body       :: String
-  , user       :: UserResponse
-  , images     :: [String]
-  , replyToId  :: Maybe ResourceId
-  , replies    :: [PostResponse]
-  , createdAt  :: LocalTime
-  , ownLikes   :: [GetLike]
-  , likeCount  :: Int64
-  , replyCount :: Int64
+  { id          :: ResourceId
+  , body        :: String
+  , user        :: UserResponse
+  , images      :: [String]
+  , replyToId   :: Maybe ResourceId
+  , replies     :: [PostResponse]
+  , mentionToId :: Maybe ResourceId
+  , createdAt   :: LocalTime
+  , ownLikes    :: [GetLike]
+  , likeCount   :: Int64
+  , replyCount  :: Int64
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''PostResponse)
 
@@ -120,7 +121,7 @@ data CreateFollowRequest = CreateFollowRequest
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''CreateFollowRequest)
 
-data NotificationType = NotifyReply | NotifyFollow | NotifyLike
+data NotificationType = NotifyReply | NotifyFollow | NotifyLike | NotifyMention
   deriving (Eq, Show, Generic, Enum, Bounded, Read)
 $(deriveApiFieldSumType ''NotificationType 'NotifyReply)
 

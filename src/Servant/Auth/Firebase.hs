@@ -60,7 +60,7 @@ defaultFirebaseLoginSettings mgr pid = FirebaseLoginSettings
       HTTP.setRequestPath "/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com" .
       HTTP.setRequestManager mgr $
       HTTP.defaultRequest {
-          HTTP.responseTimeout = HTTP.responseTimeoutMicro (1000 * 1000)
+          HTTP.responseTimeout = HTTP.responseTimeoutMicro (5 * 1000 * 1000)
         }
 
 newtype AccountId = AccountId { unAccountId :: String }

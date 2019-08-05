@@ -4,12 +4,13 @@ module Handler.User where
 import           App
 import           Auth
 import           Data.Maybe
-import           Data.Type.Map      as TM
+import           Data.Type.Map        as TM
 import           Handler.Middleware
+import           Service.Notification
 import           Service.Owner
 import           Service.Post
 import           Service.User
-import           Type               as T
+import           Type                 as T
 import           Util
 import           View
 
@@ -49,9 +50,9 @@ getFollowersR _ uid _        = getFollowers Nothing uid >>= loadRenderUsers
 patchUserR :: AccountId -> ResourceId -> UpdateUserRequest -> AppM ()
 patchUserR = updateUser
 
-getNotificationsR :: AccountId -> AppM [GetNotification]
-getNotificationsR a = do
-  ns <- getNotifications a
+getNotificationsR :: AccountId -> Maybe ResourceId -> AppM [GetNotification]
+getNotificationsR a mcursor = do
+  ns <- getNotifications a mcursor
   c <- snd <$> loadNotificationRelation a ns TM.Empty
   runViewM $ mapM (renderNotification c) ns
 

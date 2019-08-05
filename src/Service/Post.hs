@@ -18,11 +18,13 @@ import           Entity.Like
 import           Entity.Notification
 import           Entity.Post
 import           Entity.PostImage
+import           Entity.QuestionUser
 import           Query                as Q
 import           Service.Loader
 import           Service.Notification
 import           Service.User
 import           Service.Util
+import           System.Random
 import           Type
 
 getPosts :: MonadService m => AccountId -> Maybe ResourceId -> Maybe ResourceId -> Maybe String -> m [Post]
@@ -101,3 +103,47 @@ deleteLike (AccountId a) uid pid = do
   getOwnUser a uid
   deleteM Q.deleteLike (uid, pid)
   pure ()
+
+createQuestionPost :: MonadService m => ResourceId -> m ()
+createQuestionPost uid = do
+  qs <- queryM selectNewQuestions uid
+  case qs of
+    h:_ -> do
+      let qs' = filter (\x -> x ^. #priority == (h ^. #priority)) qs
+      q <- liftIO $ atRandIndex qs'
+      create q
+    _ -> do
+      liftIO $ putStrLn "all question has been used"
+      pure ()
+  where
+    create q = do
+      pid <- getTid
+      quid <- getTid
+      now <- getCurrentLocalTime
+      let p = Post
+            { id = pid
+            , userId = robotUserId
+            , body = q ^. #body
+            , replyTo = Nothing
+            , mentionTo = Just uid
+            , createdAt = now
+            , aggLikeCount = 0
+            , aggReplyCount = 0
+            }
+      let qu = QuestionUser
+            { id = quid
+            , questionId = q ^. #id
+            , userId = uid
+            , createdAt = now
+            }
+      runTransactionM $ do
+        insertM insertPost p
+        insertM insertQuestionUser qu
+        createNotification uid NotifyMention (Just robotUserId) (Just pid)
+      pure ()
+
+
+atRandIndex :: [a] -> IO a
+atRandIndex l = do
+    i <- randomRIO (0, length l - 1)
+    return $ l !! i

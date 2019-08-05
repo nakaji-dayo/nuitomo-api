@@ -72,6 +72,7 @@ library:
   - unordered-containers
   - base58-bytestring
   - random-bytestring
+  - random
 
 executables:
   nuitomo-api:
@@ -84,6 +85,7 @@ executables:
     dependencies:
     - base
     - nuitomo-api
+    - cron
   nuitomo-api-batch:
     main: Main.hs
     source-dirs: app/batch
