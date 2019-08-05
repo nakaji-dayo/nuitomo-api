@@ -1,12 +1,5 @@
 insert into "user" values(100, 'robo', 'ぬいぐるみたちに、nuitomoの案内や質問をします', '', '', '', '', '', '', now());
 
-create table user_image (
-  id bigint not null,
-  user_id bigint references "user"(id) not null,
-  path text not null,
-  primary key (id)
-);
-
 insert into "user_image" values (100, 100, 'system/robot.png');
 
 create table "question" (
