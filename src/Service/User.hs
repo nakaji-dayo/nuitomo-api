@@ -24,6 +24,9 @@ import           Service.Util
 import           Type
 import           Util
 
+robotUserId :: ResourceId
+robotUserId = 100
+
 getUser :: MonadService m => String -> ResourceId -> m (User, Maybe OwnerUser)
 getUser = curry (getResource Q.selectUser)
 
@@ -120,9 +123,6 @@ getFollowees uid = queryM selectFollowees uid
 
 getFollowers :: MonadService m => Maybe AccountId -> ResourceId -> m [User]
 getFollowers maid uid = queryM (selectFollowers (unAccountId <$> maid)) uid
-
-getNotifications :: MonadService m => AccountId -> m [(Notification, User, Maybe User, Maybe Post)]
-getNotifications (AccountId uid) = queryM selectNotifications uid
 
 loadNotificationRelation (AccountId aid) xs ctx =
   loadPostImages (Var :: Var "postImages") (mapMaybe (^. #refPostId) $ fmap fst4 xs) ctx

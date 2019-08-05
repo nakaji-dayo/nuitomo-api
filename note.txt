@@ -1,0 +1,32 @@
+botに寄る質問
+関連機能: "このユーザー宛のメッセージを送る"
+
+post.mention_toを設定
+通知type追加
+
+uidsに寄るpostフィルタはmention_toを含む?
+impl: or (mention_to in [...])
+  tl: 自分のfollowしているユーザー全てへの質問が出る<だめ
+  home: 自分のuserへの質問が出る
+  user: そのユーザーへの質問が出る
+
+
+mentio_toはnotifyでのみ把握し、replyしたものだけ、質問も含めて表示。
+impl: 何らかの条件で(reply_to==null)をはずす
+        reply_toにjoinし、userをフォローしているか見る？
+      post.repliesに落とし込みたい
+      `reply_to <- eager loading post?
+      `ps <- posts
+       rs <- posts (repli_to <$> ps)
+       merge ps rs -- cost?
+  tl: botへの回答は出て良い、フォローしているユーザー間の会話は出て良い、それ以外は?
+  home: あらゆる返信と、その宛先が出て良い(on/offできても良い)
+  user: あらゆる返信と、その宛先が出て良い(on/offできても良い)
++これまでの質問一覧は作っても良い
+
+
+botの判別
+  botユーザーは初期フォローとして扱う<-抽象度高い
+  　フォロー外すと質問来なくなるとかもできる
+  botは暗黙でフォローしている扱いで実装
+  botの投稿にはフラグ立てて実装<- 楽

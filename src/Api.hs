@@ -80,7 +80,7 @@ userApi au = (
   )
 
 type OtherAPI =
-  "notifications" :> Get '[JSON] [GetNotification]
+  "notifications" :> QueryParam "cursor" ResourceId :> Get '[JSON] [GetNotification]
   :<|> "me" :> Get '[JSON] MeResponse
   :<|> "owners"  :> Capture "id" ResourceId :> Delete '[JSON] ()
 

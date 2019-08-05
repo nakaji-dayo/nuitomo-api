@@ -13,5 +13,8 @@ values' ::
 values' [] = values [-1]
 values' x  = values x
 
+values'' [] = values [Just (-1)]
+values'' xs = values xs
+
 limit' :: Int -> QuerySuffix
 limit' n = ["limit", K.word (show n)]

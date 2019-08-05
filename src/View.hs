@@ -45,6 +45,7 @@ renderPost c p = do
       , images = vImages
       , replies = vReplies
       , replyToId = p ^. #replyTo
+      , mentionToId = p ^. #mentionTo
       , createdAt = p ^. #createdAt
       , ownLikes =  vLikes
       , likeCount = p ^. #aggLikeCount

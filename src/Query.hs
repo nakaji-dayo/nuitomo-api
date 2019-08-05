@@ -86,6 +86,11 @@ selectUser = q' $ \ph -> do
   wheres $ u ! #id .=. ph ! snd'
   pure $ u >< ou
 
+selectAllUser :: Query () User
+selectAllUser =  q $ do
+  u <- query E.user
+  pure u
+
 selectUsers :: Query String User
 selectUsers =  q' $ \ph -> do
   u <- query E.user
@@ -149,12 +154,16 @@ selectUserImages = q' $ \ph -> do
   wheres $ ui ! #userId .=. ph
   pure ui
 
+-- note: mention_to周りの実装
+-- 宛先に表示すべきuidsを含むものも取得している。ただし返信が1件以上あるもののみ
+-- mention_toは当てられたユーザーしか返信できないため（「質問」機能限定のことだが、一旦mention一般に実装している）
 selectPosts :: [ResourceId] -> Maybe ResourceId -> Query () Post
 selectPosts uids mcursor = relationalQuery' (relation r) (limit' 40)
   where
     r = do
       p <- query post
       wheres $ p ! #userId `in'` values' uids
+        `or'` (p ! #mentionTo `in'` values'' (Just <$> uids) `and'` p ! #aggReplyCount .>. value 0)
       wheres $ isNothing (p ! #replyTo)
       forM mcursor $ \cursor -> do
         wheres $ p ! #id .<. value cursor
@@ -168,20 +177,24 @@ deleteFollow = delete $ \proj ->
     wheres $ proj ! #toUserId .=. (ph ! snd')
 
 selectNotifications ::
-  Query String (Notification, User, Maybe User, Maybe Post)
-selectNotifications = q' $ \ph -> do
-  n <- query notification
-  ou <- query ownerUser
-  on $ n ! #userId .=. ou ! #userId
-  u <- query E.user
-  on $ u ! #id .=. n ! #userId
-  mpu <- queryMaybe E.user
-  on $ mpu ?! #id .=. n ! #refUserId
-  mp <- queryMaybe post
-  on $ mp ?! #id .=. n ! #refPostId
-  wheres $ ou ! #ownerId .=. ph
-  desc $ n ! #id
-  return $ (,,,) |$| n |*| u |*| mpu |*| mp
+  Maybe ResourceId -> Query String (Notification, User, Maybe User, Maybe Post)
+selectNotifications mcursor = relationalQuery' (relation' . placeholder $ r) (limit' 40)
+  where
+    r ph = do
+      n <- query notification
+      ou <- query ownerUser
+      on $ n ! #userId .=. ou ! #userId
+      u <- query E.user
+      on $ u ! #id .=. n ! #userId
+      mpu <- queryMaybe E.user
+      on $ mpu ?! #id .=. n ! #refUserId
+      mp <- queryMaybe post
+      on $ mp ?! #id .=. n ! #refPostId
+      wheres $ ou ! #ownerId .=. ph
+      forM mcursor $ \cursor -> do
+        wheres $ n ! #id .<. value cursor
+      desc $ n ! #id
+      return $ (,,,) |$| n |*| u |*| mpu |*| mp
 
 deleteLike :: Delete (ResourceId, ResourceId)
 deleteLike = delete $ \proj ->
@@ -211,6 +224,18 @@ countReply = update $ \proj -> do
                                          ) Database.Relational.id' count
     Post.aggReplyCount' <-# fromMaybe' (value 0) ts
     wheres $ proj ! #id .=. ph
+
+selectNewQuestions :: Query ResourceId Question
+selectNewQuestions = relationalQuery' r (limit' 10)
+  where
+    r = relation' . placeholder $ \ph -> do
+      q <- query question
+      qu <- queryMaybe questionUser
+      on $ just (q ! #id) .=. qu ?! #questionId
+        `and'` qu ?! #userId .=. just ph
+      wheres $ isNothing qu
+      asc $ q ! #priority
+      pure q
 
 fromMaybe' :: SqlContext c => Record c a -> Record c (Maybe a) -> Record c a
 fromMaybe' d m = unsafeProjectSql $ "COALESCE(" <> unsafeShowSql m <> ", " <> unsafeShowSql d <>")"
@@ -268,9 +293,6 @@ includePostReplies ids = relation $ do
   wheres $ p ! #replyTo `in'` (values'' (Just <$> ids))
   wheres $ isJust (p ! #replyTo)
   pure $ (p ! #replyTo) >< p
-  where
-    values'' [] = values [Just (-1)]
-    values'' xs = values xs
 
 includePostLikes :: String -> [ResourceId] -> Relation () (ResourceId, Like)
 includePostLikes aid ids = relation $ do
