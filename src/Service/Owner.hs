@@ -1,4 +1,5 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE LambdaCase            #-}
 {-# LANGUAGE OverloadedLabels      #-}
 module Service.Owner where
 
@@ -9,6 +10,7 @@ import           Data.ByteString.Char8      as BS
 import           Data.ByteString.Random.MWC
 import           Entity
 import           Entity.OwnerKey
+import           Entity.OwnerToken
 import           Entity.OwnerUser
 import           Query                      as Q
 import           Service.Exception
@@ -63,3 +65,20 @@ deleteOwner aid ouid = do
   checkPrimaryOwner aid (ou ^. #userId)
   deleteM deleteOwnerUser ouid
   pure ()
+
+setOwnerPushToken aid token = runTransactionM $ do
+  selectOneM Q.selectOwnerToken token
+    >>= \case
+    Just ot -> do
+      let ot' = ot & #ownerId .~ aid
+      keyUpdateM updateOwnerToken ot'
+      pure ot'
+    Nothing -> do
+      tid <- getTid
+      let ot = OwnerToken
+            { id = tid
+            , ownerId = aid
+            , token = token
+            }
+      insertM insertOwnerToken ot
+      pure ot

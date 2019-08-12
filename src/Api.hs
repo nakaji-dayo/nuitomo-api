@@ -83,11 +83,13 @@ type OtherAPI =
   "notifications" :> QueryParam "cursor" ResourceId :> Get '[JSON] [GetNotification]
   :<|> "me" :> Get '[JSON] MeResponse
   :<|> "owners"  :> Capture "id" ResourceId :> Delete '[JSON] ()
+  :<|> "push_tokens" :> ReqBody '[JSON] String :> Post '[JSON] ()
 
 otherApi au =
   getNotificationsR au
   :<|> getMeR au
   :<|> deleteOwnersR au
+  :<|> postPushTokensR au
 
 type UnProtected =
   Tags "System" :>

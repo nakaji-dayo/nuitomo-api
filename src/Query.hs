@@ -302,3 +302,17 @@ includePostLikes aid ids = relation $ do
   wheres $ ou ! #ownerId .=. value aid
   wheres $ l ! #postId `in'` values' ids
   pure $ (l ! #postId) >< l
+
+selectOwnerToken :: Query String OwnerToken
+selectOwnerToken = q' $ \ph -> do
+  ot <- query ownerToken
+  wheres $ ot ! #token .=. ph
+  pure ot
+
+selectTokensByUserId :: Query ResourceId OwnerToken
+selectTokensByUserId = q' $ \ph -> do
+  ou <- query ownerUser
+  ot <- query ownerToken
+  on $ ou ! #ownerId .=. ot ! #ownerId
+  wheres $ ou ! #userId .=. ph
+  pure ot

@@ -16,7 +16,7 @@ module Type (
   -- , name -- 明示的に指定しないと、何故かexportされない。バグ?
   ) where
 
-import           Control.Lens       (view, (^.))
+import           Control.Lens       (view, (&), (.~), (?~), (^.))
 import           Data.Int           (Int64)
 import           Data.Record.Extend
 import           Data.Time
