@@ -1,6 +1,7 @@
 body {
   font-size: 16px;
   font-family: sans-serif;
+  color: #393939;
 }
 * {
   box-sizing: border-box;
@@ -39,6 +40,15 @@ body {
   font-weight: bold;
   color: #fff;
 }
+.Share {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 8px 8px 0;
+}
+.Share > * {
+  margin-right: 8px;
+}
 
 .Page__body {
 }
@@ -53,7 +63,7 @@ body {
 }
 
 .Content {
-  margin: 16px auto 32px;
+  margin: 8px auto 32px;
 }
 .Content__head {
   margin: 0;
@@ -89,7 +99,8 @@ body {
 }
 .Description__head {
   font-size: 15px;
-  margin: 8px 0;
+  margin: 0 0 8px;
+  color: #555;
 }
 .Description__body > p {
   margin: 0 auto 8px;

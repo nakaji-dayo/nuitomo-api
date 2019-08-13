@@ -1,17 +1,30 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
+<head prefix="og: http://ogp.me/ns#">
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="ぬいぐるみにおともだちができるアプリ「ぬいとも」の紹介ページです。">
+  <meta name="description" content="ぬいぐるみ専用SNSアプリ「ぬいとも」の紹介ページです。">
   <title>ぬいとも</title>
+  <meta property="og:title" content="ぬいとも：ぬいぐるみにおともだちができるアプリ" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.nuitomo.app/" />
+  <meta property="og:image" content="https://www.nuitomo.app/images/ogp.png" />
+  <meta property="og:site_name" content="ぬいとも" />
+  <meta property="og:description" content="ぬいぐるみ専用SNSアプリ「ぬいとも」の紹介ページです。現在iOS版のベータテスト実施中。" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@nuitomoapp" />
+  <meta name="twitter:player" content="@nuitomoapp" />
   <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
-      rel="stylesheet">
+    href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+    rel="stylesheet">
   <link rel="stylesheet" href="./css/index.css">
 </head>
 <body>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v4.0"></script>
+<div id="fb-root"></div>
+
 <div class="Page">
   <div class="Page__head Signboard">
     <h1 class="Signboard__head">
@@ -19,6 +32,13 @@
     </h1>
     <p class="Signboard__body">ぬいぐるみに<br>おともだちが<br>できるアプリ</p>
   </div>
+
+  <div class="Share">
+    <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-text="ぬいぐるみ専用SNS「ぬいとも」" data-via="nuitomoapp" data-hashtags="nuitomo" data-show-count="false">Tweet</a>
+
+    <div class="fb-share-button" data-href="https://www.nuitomo.app/" data-layout="button" data-size="small"><a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.nuitomo.app%2F&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">シェア</a></div>
+  </div>
+
   <div class="Page__body">
     <article class="Content">
 
@@ -29,6 +49,7 @@
                alt="おてつだいロボ">
         </div>
         <div class="User__body">
+          <div class="Voice__head">ぬいともロボ</div>
           <div class="baloon">こんにちは。ご機嫌いかが？</div>
         </div>
       </div>
@@ -125,7 +146,7 @@
           メールアドレス、Twitter、Facebookのいずれかで保護者アカウント登録を行うことで、異なる端末にデータを引き継げるようになります。</p>
           <p>
             自分の管理するぬいぐるみ同士も「フォロー」や「いいね」をすることで「おともだち」になることができます。<br>
-            他の保護者アカウントと自分管理外のぬいぐるみとの関係は、ぬいとも上では分かりません。
+            他者の保護者アカウントは、ぬいとも上では見ることができません。
           </p>
           <img src="./images/diagram.png" alt="一人の保護者が複数のぬいぐるみユーザーを管理できる">
         </div>
@@ -139,7 +160,7 @@
       <div class="Description__body">
         <p>現在、「ぬいとも」はiOS版の公開テスト中です。次のリンクからダウンロードいただけます。</p>
         <p>
-          <a class="link" href="https://testflight.apple.com/join/iqgyj2HK">
+          <a class="link" href="https://testflight.apple.com/join/iqgyj2HK"  target="_blank" rel="noreferrer noopener">
             <img src="./images/appicon.png" id="linkicon">「ぬいとも」ベータ版のダウンロード</a>
           <small class="note">
             (TestFlightアプリをインストールしたiPhoneが必要です。リンク先の案内をご確認ください。)
@@ -148,7 +169,7 @@
       </div>
       <div class="Description__body">
         <p>また、アプリへのフィードバックを次のフォームからお送りいただけます。気になった点など何でもご意見いただけますと幸いです。</p>
-        <p><a class="link"
+        <p><a class="link" target="_blank" rel="noreferrer noopener"
             href="https://docs.google.com/forms/d/e/1FAIpQLSdkjhWU7JTHwwwG0reDag1B3dj0YrMtyRO6yD_36Reh3xC2QA/viewform?usp=sf_link">💬フィードバックフォーム</a>
         </p>
       </div>
