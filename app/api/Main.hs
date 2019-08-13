@@ -16,5 +16,5 @@ main = do
 cronJob :: IO ()
 cronJob = do
   tids <- execSchedule $ do
-    addJob (runBatchM Batch.Question.execute) "0 12 * * *"
+    addJob (runBatchM Batch.Question.execute) "0 11 * * *"
   print tids

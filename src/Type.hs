@@ -49,6 +49,7 @@ data UserResponse = UserResponse
   , name   :: String
   , images :: [String]
   , bio    :: String
+  , robot  :: Bool
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''UserResponse)
 

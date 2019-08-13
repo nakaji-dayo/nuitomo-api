@@ -14,6 +14,7 @@ import           Data.Maybe
 import           Data.Type.Map                 as TM
 import           Entity
 import           Service.Loader
+import           Service.User                  (robotUserId)
 import           Type
 import           View.Base
 import           View.Helper
@@ -63,6 +64,7 @@ renderUser c x = do
     , name = x ^. #name
     , images = isV
     , bio = x ^. #bio
+    , robot = x ^. #id == robotUserId
     }
 
 renderDetailUser :: (IsMember
