@@ -19,6 +19,7 @@ import           Entity.Notification
 import           Entity.Post
 import           Entity.PostImage
 import           Entity.QuestionUser
+import           EntityId
 import           Query                as Q
 import           Service.Loader
 import           Service.Notification
@@ -27,7 +28,7 @@ import           Service.Util
 import           System.Random
 import           Type
 
-getPosts :: MonadService m => AccountId -> Maybe ResourceId -> Maybe ResourceId -> Maybe String -> m [Post]
+getPosts :: MonadService m => AccountId -> Maybe UserId -> Maybe PostId -> Maybe String -> m [Post]
 getPosts aid muid mcursor mscope = do
   uids <- case muid of
     Nothing -> do
@@ -39,13 +40,13 @@ getPosts aid muid mcursor mscope = do
     Just x -> pure [x]
   queryM (selectPosts uids mcursor) ()
 
-getPost :: MonadService m => ResourceId -> m Post
+getPost :: MonadService m => PostId -> m Post
 getPost pid = getResource selectPost pid
 
-createPost :: MonadService m => AccountId -> ResourceId -> String -> [String] -> Maybe ResourceId -> m ResourceId
+createPost :: MonadService m => AccountId -> UserId -> String -> [String] -> Maybe PostId -> m PostId
 createPost (AccountId aid) uid body imagePaths rep = do
   getOwnUser aid uid
-  pid <- getTid
+  pid <- PostId <$> getTid
   now <- getCurrentLocalTime
   let p = Post
         { id = pid
@@ -58,7 +59,7 @@ createPost (AccountId aid) uid body imagePaths rep = do
         , aggReplyCount = 0
         }
   pis <- forM imagePaths $ \x -> do
-    iid <- getTid
+    iid <- PostImageId <$> getTid
     pure $ PostImage
       { id = iid
       , postId = pid
@@ -85,7 +86,7 @@ loadPostsRelation (AccountId aid) xs ctx = do
 createLike (AccountId i) uid pid = do
   getOwnUser i uid
   p <- getResource selectPost pid
-  tid <- getTid
+  tid <- LikeId <$> getTid
   now <- getCurrentLocalTime
   let l = Like
         { id = tid
@@ -104,7 +105,7 @@ deleteLike (AccountId a) uid pid = do
   deleteM Q.deleteLike (uid, pid)
   pure ()
 
-createQuestionPost :: MonadService m => ResourceId -> m ()
+createQuestionPost :: MonadService m => UserId -> m ()
 createQuestionPost uid = do
   qs <- queryM selectNewQuestions uid
   case qs of
@@ -117,8 +118,8 @@ createQuestionPost uid = do
       pure ()
   where
     create q = do
-      pid <- getTid
-      quid <- getTid
+      pid <- PostId <$> getTid
+      quid <- QuestionUserId <$> getTid
       now <- getCurrentLocalTime
       let p = Post
             { id = pid

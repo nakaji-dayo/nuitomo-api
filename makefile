@@ -12,7 +12,7 @@ default: build
 # build app
 .PHONY: build
 build:
-	stack build --ghc-options=$(DEFAULT_BUILD_OPTS) :nuitomo-api-$(TARGET)
+	stack build --ghc-options=$(DEFAULT_BUILD_OPTS) :nuitomo-$(TARGET)
 
 .PHONY: build-all
 build-all:

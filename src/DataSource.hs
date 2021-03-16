@@ -13,8 +13,9 @@ import           Data.Pool
 import           Database.HDBC                   (disconnect)
 import           Database.HDBC.PostgreSQL        (Connection, connectPostgreSQL)
 import           Database.HDBC.Query.TH          (defineTableFromDB)
-import           Database.HDBC.Schema.Driver     (typeMap)
+import           Database.HDBC.Schema.Driver     (getFieldsWithMap, typeMap)
 import           Database.HDBC.Schema.PostgreSQL (driverPostgreSQL)
+import           EntityId
 import           Language.Haskell.TH             (Dec, Name, Q, TypeQ)
 
 createPool' :: Config -> IO (Pool Connection)
@@ -37,10 +38,14 @@ connectWithLoadConfig = do
 
 defineEntity :: String -> [Name] -> Q [Dec]
 defineEntity =
-  defineTableFromDB
-    connectWithLoadConfig
-    (driverPostgreSQL { typeMap = convTypes })
-    "public"
+  let driver = driverPostgreSQL { typeMap = convTypes }
+      getFields m c l scm tbl = do
+        (tm, nn) <- getFieldsWithMap driver m c l scm tbl
+        return (map (getField' tbl) tm, nn)
+  in defineTableFromDB
+     connectWithLoadConfig
+     (driver {getFieldsWithMap = getFields})
+     "public"
 
 convTypes :: [(String, TypeQ)]
 convTypes = []

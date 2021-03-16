@@ -1,0 +1,31 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "nuitomo-api:lib"
+
+    - path: "./app/api/Main.hs"
+      component: "nuitomo-api:exe:nuitomo-api"
+
+    - path: "./app/api/Paths_nuitomo_api.hs"
+      component: "nuitomo-api:exe:nuitomo-api"
+
+    - path: "./app/batch/Main.hs"
+      component: "nuitomo-api:exe:nuitomo-api-batch"
+
+    - path: "./app/batch/Paths_nuitomo_api.hs"
+      component: "nuitomo-api:exe:nuitomo-api-batch"
+
+    - path: "./app/mock/Main.hs"
+      component: "nuitomo-api:exe:nuitomo-api-mock"
+
+    - path: "./app/mock/Paths_nuitomo_api.hs"
+      component: "nuitomo-api:exe:nuitomo-api-mock"
+
+    - path: "./app/swagger/Main.hs"
+      component: "nuitomo-api:exe:nuitomo-api-swagger"
+
+    - path: "./app/swagger/Paths_nuitomo_api.hs"
+      component: "nuitomo-api:exe:nuitomo-api-swagger"
+
+    - path: "./test"
+      component: "nuitomo-api:test:nuitomo-api-test"

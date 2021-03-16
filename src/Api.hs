@@ -13,6 +13,7 @@ module Api where
 import           App
 import           Auth
 import qualified Config
+import           EntityId
 import           Handler.Error
 import           Handler.Post
 import           Handler.System
@@ -33,10 +34,10 @@ import           Debug.Trace
 --   toSwagger Proxy = toSwagger $ Proxy @api
 
 type PostAPI =
-  Summary "List posts" :> "posts" :> QueryParam "uid" ResourceId :> QueryParam "cursor" ResourceId :> QueryParam "scope" String :> Get '[JSON] [PostResponse]
-  :<|> Summary "detail posts" :> "posts" :> Capture "id" ResourceId :> Get '[JSON] PostResponse
-  :<|> Summary "Create Post" :> "posts" :> ReqBody '[JSON] CreatePostRequest :> Post '[JSON] ResourceId
-  :<|> "likes" :> ReqBody '[JSON] CreateLikeRequest :> Post '[JSON] ResourceId
+  Summary "List posts" :> "posts" :> QueryParam "uid" UserId :> QueryParam "cursor" PostId :> QueryParam "scope" String :> Get '[JSON] [PostResponse]
+  :<|> Summary "detail posts" :> "posts" :> Capture "id" PostId :> Get '[JSON] PostResponse
+  :<|> Summary "Create Post" :> "posts" :> ReqBody '[JSON] CreatePostRequest :> Post '[JSON] PostId
+  :<|> "likes" :> ReqBody '[JSON] CreateLikeRequest :> Post '[JSON] LikeId
   :<|> "likes" :> ReqBody '[JSON] CreateLikeRequest :> Delete '[JSON] ()
 
 postApi :: AccountId -> ServerT PostAPI AppM
@@ -50,15 +51,15 @@ type UserAPI =
   "users" :> (
   Summary "List User" :> Get '[JSON] [UserResponse]
   :<|> Summary "Search User" :> "_search" :> QueryParam "q" String :> Get '[JSON] [UserResponse]
-  :<|> Summary "User" :> Capture "id" ResourceId :> Get '[JSON] DetailUserResponse
-  :<|> Summary "Update User" :> Capture "id" ResourceId :> ReqBody '[JSON] UpdateUserRequest :> Patch '[JSON] ()
-  :<|> Summary "Create User" :> ReqBody '[JSON] CreateUserRequest :> Post '[JSON] ResourceId
-  :<|> Capture "id" ResourceId :> "follows" :> Summary "Create Follow" :> ReqBody '[JSON] CreateFollowRequest :> Post '[JSON] ()
-  :<|> Capture "id" ResourceId :> "follows" :> Summary "Delete Follow" :> ReqBody '[JSON] CreateFollowRequest :> Delete '[JSON] ()
-  :<|> Capture "id" ResourceId :> "followees" :> Summary "List Followee" :> Get '[JSON] [UserResponse]
-  :<|> Capture "id" ResourceId :> "followers" :> Summary "List Follower" :> QueryParam "scope" String :> Get '[JSON] [UserResponse]
-  :<|> Capture "id" ResourceId :> "owners" :> Get '[JSON] [OwnerResponse]
-  :<|> Capture "id" ResourceId :> "owners" :> ReqBody '[JSON] String :> Post '[JSON] ()
+  :<|> Summary "User" :> Capture "id" UserId :> Get '[JSON] DetailUserResponse
+  :<|> Summary "Update User" :> Capture "id" UserId :> ReqBody '[JSON] UpdateUserRequest :> Patch '[JSON] ()
+  :<|> Summary "Create User" :> ReqBody '[JSON] CreateUserRequest :> Post '[JSON] UserId
+  :<|> Capture "id" UserId :> "follows" :> Summary "Create Follow" :> ReqBody '[JSON] CreateFollowRequest :> Post '[JSON] ()
+  :<|> Capture "id" UserId :> "follows" :> Summary "Delete Follow" :> ReqBody '[JSON] CreateFollowRequest :> Delete '[JSON] ()
+  :<|> Capture "id" UserId :> "followees" :> Summary "List Followee" :> Get '[JSON] [UserResponse]
+  :<|> Capture "id" UserId :> "followers" :> Summary "List Follower" :> QueryParam "scope" String :> Get '[JSON] [UserResponse]
+  :<|> Capture "id" UserId :> "owners" :> Get '[JSON] [OwnerResponse]
+  :<|> Capture "id" UserId :> "owners" :> ReqBody '[JSON] String :> Post '[JSON] ()
   )
 
 
@@ -80,9 +81,9 @@ userApi au = (
   )
 
 type OtherAPI =
-  "notifications" :> QueryParam "cursor" ResourceId :> Get '[JSON] [GetNotification]
+  "notifications" :> QueryParam "cursor" NotificationId :> Get '[JSON] [GetNotification]
   :<|> "me" :> Get '[JSON] MeResponse
-  :<|> "owners"  :> Capture "id" ResourceId :> Delete '[JSON] ()
+  :<|> "owners"  :> Capture "id" OwnerUserId :> Delete '[JSON] ()
   :<|> "push_tokens" :> ReqBody '[JSON] String :> Post '[JSON] ()
 
 otherApi au =

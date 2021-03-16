@@ -21,6 +21,7 @@ import           Data.Int           (Int64)
 import           Data.Record.Extend
 import           Data.Time
 import           Data.Time.Calendar
+import           EntityId
 import           GHC.Generics
 import           Instance           ()
 import           TH.Type
@@ -45,7 +46,7 @@ $(deriveApiField ''MeResponse)
 type Tag = String
 
 data UserResponse = UserResponse
-  { id     :: ResourceId
+  { id     :: UserId
   , name   :: String
   , images :: [String]
   , bio    :: String
@@ -76,18 +77,18 @@ data CreateUserRequest = CreateUserRequest
 $(deriveApiField ''CreateUserRequest)
 
 data GetLike = GetLike
- { userId  :: ResourceId
+ { userId  :: UserId
  } deriving (Show, Generic, Eq)
 $(deriveApiField ''GetLike)
 
 data PostResponse = PostResponse
-  { id          :: ResourceId
+  { id          :: PostId
   , body        :: String
   , user        :: UserResponse
   , images      :: [String]
-  , replyToId   :: Maybe ResourceId
+  , replyToId   :: Maybe PostId
   , replies     :: [PostResponse]
-  , mentionToId :: Maybe ResourceId
+  , mentionToId :: Maybe UserId
   , createdAt   :: LocalTime
   , ownLikes    :: [GetLike]
   , likeCount   :: Int64
@@ -96,10 +97,10 @@ data PostResponse = PostResponse
 $(deriveApiField ''PostResponse)
 
 data CreatePostRequest= CreatePostRequest
-  { userId  :: ResourceId
+  { userId  :: UserId
   , body    :: String
   , images  :: [String]
-  , replyTo :: Maybe ResourceId
+  , replyTo :: Maybe PostId
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''CreatePostRequest)
 
@@ -118,7 +119,7 @@ data UpdateUserRequest = UpdateUserRequest
 $(deriveApiField ''UpdateUserRequest)
 
 data CreateFollowRequest = CreateFollowRequest
-  { toUserId  :: ResourceId
+  { toUserId  :: UserId
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''CreateFollowRequest)
 
@@ -127,7 +128,7 @@ data NotificationType = NotifyReply | NotifyFollow | NotifyLike | NotifyMention
 $(deriveApiFieldSumType ''NotificationType 'NotifyReply)
 
 data GetNotification = GetNotification
-  { id               :: ResourceId
+  { id               :: NotificationId
   , user             :: UserResponse
   , notificationType :: NotificationType
   , refUser          :: Maybe UserResponse
@@ -137,13 +138,13 @@ $(deriveApiField ''GetNotification)
 
 
 data CreateLikeRequest = CreateLikeRequest
-  { userId :: ResourceId
-  , postId :: ResourceId
+  { userId :: UserId
+  , postId :: PostId
   } deriving (Show, Generic, Eq)
 $(deriveApiField ''CreateLikeRequest)
 
 data OwnerResponse = OwnerResponse
-  { id        :: ResourceId
+  { id        :: OwnerUserId
   , key       :: String
   , isPrimary :: Bool
   } deriving (Show, Generic, Eq)

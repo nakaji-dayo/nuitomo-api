@@ -15,6 +15,7 @@ import           Database.Relational
 import           Database.Relational.OverloadedProjection (HasProjection)
 import           Entity                                   as E
 import           Entity.Post                              as Post
+import           EntityId
 import           Query.Util
 import           Type                                     as T
 
@@ -43,7 +44,7 @@ q' ::
   -> Query p r
 q' x = relationalQuery' (relation'. placeholder $ x) []
 
-selectPrimaryOwner :: Query (String, ResourceId) ResourceId
+selectPrimaryOwner :: Query (String, UserId) OwnerUserId
 selectPrimaryOwner = q' $ \ph -> do
   ou <- query ownerUser
   wheres $ ou ! #ownerId .=. ph ! fst'
@@ -57,7 +58,7 @@ selectOwnerKey = q' $ \ph -> do
   wheres $ o ! #ownerId .=. ph
   pure o
 
-selectOwners :: Query ResourceId (OwnerKey, OwnerUser)
+selectOwners :: Query UserId (OwnerKey, OwnerUser)
 selectOwners = q' $ \ph -> do
   ou <- query ownerUser
   o <- query ownerKey
@@ -71,13 +72,13 @@ selectOwnerByKey = q' $ \ph -> do
   wheres $ o ! #key .=. ph
   pure $ o ! #ownerId
 
-deleteOwnerUser :: Delete ResourceId
+deleteOwnerUser :: Delete OwnerUserId
 deleteOwnerUser = delete $ \proj ->
   fmap fst . placeholder $ \ph -> do
     wheres $ (proj :: Record Flat OwnerUser) ! #id .=. ph
 
 selectUser
-  :: Query (String, ResourceId) (User, Maybe OwnerUser)
+  :: Query (String, UserId) (User, Maybe OwnerUser)
 selectUser = q' $ \ph -> do
   u <- query E.user
   ou <- queryMaybe ownerUser
@@ -99,7 +100,7 @@ selectUsers =  q' $ \ph -> do
   wheres $ ou ! #ownerId .=. ph
   pure u
 
-selectFollowees :: Query ResourceId User
+selectFollowees :: Query UserId User
 selectFollowees =  q' $ \ph -> do
   u <- query E.user
   f <- query follow
@@ -107,7 +108,7 @@ selectFollowees =  q' $ \ph -> do
   wheres $ f ! #userId .=. ph
   pure u
 
-selectOwnerFollowees :: Query String ResourceId
+selectOwnerFollowees :: Query String UserId
 selectOwnerFollowees =  q' $ \ph -> do
   ou <- query ownerUser
   f <- query follow
@@ -115,7 +116,7 @@ selectOwnerFollowees =  q' $ \ph -> do
   wheres $ ou ! #ownerId .=. ph
   pure $ f ! #toUserId
 
-selectFollowers :: Maybe String -> Query ResourceId User
+selectFollowers :: Maybe String -> Query UserId User
 selectFollowers maid =  q' $ \ph -> do
   u <- query E.user
   f <- query follow
@@ -127,7 +128,7 @@ selectFollowers maid =  q' $ \ph -> do
   wheres $ f ! #toUserId .=. ph
   pure u
 
-selectOwnUser :: Query (String, ResourceId) User
+selectOwnUser :: Query (String, UserId) User
 selectOwnUser =  q' $ \ph -> do
   u <- query E.user
   ou <- query ownerUser
@@ -142,13 +143,13 @@ selectUserSearch mq = q $ do
   forM_ mq $ \x -> wheres $ u ! #name `like'` value ("%" <> x <> "%")
   pure u
 
-selectUserIds :: Query String ResourceId
+selectUserIds :: Query String UserId
 selectUserIds =  q' $ \ph -> do
   ou <- query ownerUser
   wheres $ ou ! #ownerId .=. ph
   pure $ ou ! #userId
 
-selectUserImages :: Query ResourceId UserImage
+selectUserImages :: Query UserId UserImage
 selectUserImages = q' $ \ph -> do
   ui <- query userImage
   wheres $ ui ! #userId .=. ph
@@ -157,7 +158,7 @@ selectUserImages = q' $ \ph -> do
 -- note: mention_to周りの実装
 -- 宛先に表示すべきuidsを含むものも取得している。ただし返信が1件以上あるもののみ
 -- mention_toは当てられたユーザーしか返信できないため（「質問」機能限定のことだが、一旦mention一般に実装している）
-selectPosts :: [ResourceId] -> Maybe ResourceId -> Query () Post
+selectPosts :: [UserId] -> Maybe PostId -> Query () Post
 selectPosts uids mcursor = relationalQuery' (relation r) (limit' 40)
   where
     r = do
@@ -170,14 +171,14 @@ selectPosts uids mcursor = relationalQuery' (relation r) (limit' 40)
       desc $ p ! #id
       pure p
 
-deleteFollow :: Delete (ResourceId, ResourceId)
+deleteFollow :: Delete (UserId, UserId)
 deleteFollow = delete $ \proj ->
   fmap fst . placeholder $ \ph -> do
     wheres $ (proj :: Record Flat Follow) ! #userId .=. (ph ! fst')
     wheres $ proj ! #toUserId .=. (ph ! snd')
 
 selectNotifications ::
-  Maybe ResourceId -> Query String (Notification, User, Maybe User, Maybe Post)
+  Maybe NotificationId -> Query String (Notification, User, Maybe User, Maybe Post)
 selectNotifications mcursor = relationalQuery' (relation' . placeholder $ r) (limit' 40)
   where
     r ph = do
@@ -196,13 +197,13 @@ selectNotifications mcursor = relationalQuery' (relation' . placeholder $ r) (li
       desc $ n ! #id
       return $ (,,,) |$| n |*| u |*| mpu |*| mp
 
-deleteLike :: Delete (ResourceId, ResourceId)
+deleteLike :: Delete (UserId, PostId)
 deleteLike = delete $ \proj ->
   fmap fst . placeholder $ \ph -> do
     wheres $ (proj :: Record Flat Like) ! #userId .=. (ph ! fst')
     wheres $ proj ! #postId .=. (ph ! snd')
 
-countLike :: Update ResourceId
+countLike :: Update PostId
 countLike = update $ \proj -> do
   fmap fst $  placeholder $ \ph -> do
     ts <- queryScalar $ aggregatedUnique ( relation $ do
@@ -213,7 +214,7 @@ countLike = update $ \proj -> do
     Post.aggLikeCount' <-# fromMaybe' (value 0) ts
     wheres $ proj ! #id .=. ph
 
-countReply :: Update ResourceId
+countReply :: Update PostId
 countReply = update $ \proj -> do
   fmap fst $  placeholder $ \ph -> do
     ts <- queryScalar $ aggregatedUnique ( relation $ do
@@ -225,7 +226,7 @@ countReply = update $ \proj -> do
     Post.aggReplyCount' <-# fromMaybe' (value 0) ts
     wheres $ proj ! #id .=. ph
 
-selectNewQuestions :: Query ResourceId Question
+selectNewQuestions :: Query UserId Question
 selectNewQuestions = relationalQuery' r (limit' 10)
   where
     r = relation' . placeholder $ \ph -> do
@@ -279,22 +280,22 @@ make1NInclude t1 c1 t2 c2 k ordC ids = relation $ do
 
 -- includeUsers = makeInclude
 
-includeUserImages :: [ResourceId] -> Relation () (ResourceId, UserImage)
+includeUserImages :: [UserId] -> Relation () (UserId, UserImage)
 includeUserImages = makeInclude userImage #userId
 
-includePostImages :: [ResourceId] -> Relation () (ResourceId, PostImage)
+includePostImages :: [PostId] -> Relation () (PostId, PostImage)
 includePostImages = makeInclude postImage #postId
 
 includePostReplies
-  :: [ResourceId]
-     -> Relation () (Maybe ResourceId, Post)
+  :: [PostId]
+     -> Relation () (Maybe PostId, Post)
 includePostReplies ids = relation $ do
   p <- query post
   wheres $ p ! #replyTo `in'` (values'' (Just <$> ids))
   wheres $ isJust (p ! #replyTo)
   pure $ (p ! #replyTo) >< p
 
-includePostLikes :: String -> [ResourceId] -> Relation () (ResourceId, Like)
+includePostLikes :: String -> [PostId] -> Relation () (PostId, Like)
 includePostLikes aid ids = relation $ do
   l <- query E.like
   ou <- query ownerUser
@@ -309,7 +310,7 @@ selectOwnerToken = q' $ \ph -> do
   wheres $ ot ! #token .=. ph
   pure ot
 
-selectTokensByUserId :: Query ResourceId OwnerToken
+selectTokensByUserId :: Query UserId OwnerToken
 selectTokensByUserId = q' $ \ph -> do
   ou <- query ownerUser
   ot <- query ownerToken

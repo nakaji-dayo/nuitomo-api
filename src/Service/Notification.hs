@@ -8,20 +8,21 @@ import           Control.Concurrent
 import           Entity
 import           Entity.Notification
 import           Entity.User         as E
+import           EntityId
 import           Network.Expo.Client as EX
 import           Query
 import           Service.Util
 import           Type
 
-getNotifications :: MonadService m => AccountId -> Maybe ResourceId -> m [(Notification, User, Maybe User, Maybe Post)]
+getNotifications :: MonadService m => AccountId -> Maybe NotificationId -> m [(Notification, User, Maybe User, Maybe Post)]
 getNotifications (AccountId uid) mcursor = queryM (selectNotifications mcursor) uid
 
 createNotification
      :: (MonadService m) =>
-     ResourceId
-     -> NotificationType -> Maybe ResourceId -> Maybe ResourceId -> m Integer
+     UserId
+     -> NotificationType -> Maybe UserId -> Maybe PostId -> m Integer
 createNotification uid ntype mruid mrpid = do
-  tid <- getTid
+  tid <- NotificationId <$> getTid
   now <- getCurrentLocalTime
   let n = Notification
         { id = tid
@@ -34,7 +35,7 @@ createNotification uid ntype mruid mrpid = do
   sendPushNotification uid ntype
   insertM insertNotification n
 
-sendPushNotification :: MonadService m => ResourceId -> NotificationType -> m ()
+sendPushNotification :: MonadService m => UserId -> NotificationType -> m ()
 sendPushNotification uid ty = do
   u <- getResource E.selectUser uid
   ts <- queryM selectTokensByUserId uid

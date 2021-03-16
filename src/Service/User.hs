@@ -17,6 +17,7 @@ import           Entity.Follow
 import           Entity.OwnerUser
 import           Entity.User          as E
 import           Entity.UserImage
+import           EntityId
 import           Query                as Q
 import           Service.Loader
 import           Service.Notification
@@ -24,10 +25,10 @@ import           Service.Util
 import           Type
 import           Util
 
-robotUserId :: ResourceId
+robotUserId :: UserId
 robotUserId = 100
 
-getUser :: MonadService m => String -> ResourceId -> m (User, Maybe OwnerUser)
+getUser :: MonadService m => String -> UserId -> m (User, Maybe OwnerUser)
 getUser = curry (getResource Q.selectUser)
 
 getUsers :: MonadService m => AccountId -> m [User]
@@ -36,11 +37,11 @@ getUsers aid = queryM selectUsers (unAccountId aid)
 searchUser :: MonadService m => Maybe String -> m [User]
 searchUser x = queryM  (selectUserSearch x) ()
 
-createUser :: MonadService m => AccountId -> String -> String -> m ResourceId
+createUser :: MonadService m => AccountId -> String -> String -> m UserId
 createUser (AccountId aid) name imagePath = do
-  uid <- getTid
-  uiid <- getTid
-  oid <- getTid
+  uid <- UserId <$> getTid
+  uiid <- UserImageId <$> getTid
+  oid <- OwnerUserId <$> getTid
   now <- getCurrentLocalTime
   let ui = UserImage
         { id = uiid
@@ -71,7 +72,7 @@ createUser (AccountId aid) name imagePath = do
     insertM insertOwnerUser ou
   return uid
 
-updateUser :: MonadService m => AccountId -> ResourceId -> UpdateUserRequest -> m ()
+updateUser :: MonadService m => AccountId -> UserId -> UpdateUserRequest -> m ()
 updateUser (AccountId aid) uid req = do
   u <- getOwnUser aid uid
   let u' = u
@@ -96,12 +97,12 @@ updateUser (AccountId aid) uid req = do
 loadUserRelation rs =
   loadUserImages (Var :: Var "userImages") ((^. #id) <$> rs)
 
-getOwnUser :: MonadService m => String -> ResourceId -> m User
+getOwnUser :: MonadService m => String -> UserId -> m User
 getOwnUser a u = getResource selectOwnUser (a, u)
 
 createFollow a uid toUid = do
   getOwnUser a uid
-  tid <- getTid
+  tid <- FollowId <$> getTid
   let f = Follow
         { id = tid
         , userId = uid
@@ -118,10 +119,10 @@ deleteFollow a uid toUid = do
   pure ()
 
 
-getFollowees :: MonadService m => ResourceId -> m [User]
+getFollowees :: MonadService m => UserId -> m [User]
 getFollowees uid = queryM selectFollowees uid
 
-getFollowers :: MonadService m => Maybe AccountId -> ResourceId -> m [User]
+getFollowers :: MonadService m => Maybe AccountId -> UserId -> m [User]
 getFollowers maid uid = queryM (selectFollowers (unAccountId <$> maid)) uid
 
 loadNotificationRelation (AccountId aid) xs ctx =

@@ -12,6 +12,7 @@ import           Entity
 import           Entity.OwnerKey
 import           Entity.OwnerToken
 import           Entity.OwnerUser
+import           EntityId
 import           Query                      as Q
 import           Service.Exception
 import           Service.Util
@@ -23,7 +24,7 @@ getOwnerKey aid = do
     Just k -> pure $ k ^. #key
     Nothing -> do
       k <- liftIO genKey
-      tid <- getTid
+      tid <- OwnerKeyId <$> getTid
       let o' = OwnerKey
             { id = tid
             , ownerId = aid
@@ -36,19 +37,19 @@ getOwnerKey aid = do
       BS.unpack . encodeBase58 flickrAlphabet <$> random 5
 
 checkPrimaryOwner ::
-  MonadService m => String -> ResourceId -> m ResourceId
+  MonadService m => String -> UserId -> m OwnerUserId
 checkPrimaryOwner = curry (getResource selectPrimaryOwner)
 
-getOwners :: MonadService m => String -> ResourceId -> m [(OwnerKey, OwnerUser)]
+getOwners :: MonadService m => String -> UserId -> m [(OwnerKey, OwnerUser)]
 getOwners aid uid = checkPrimaryOwner aid uid >> queryM selectOwners uid
 
-addOwner :: MonadService m => String -> ResourceId -> String -> m ()
+addOwner :: MonadService m => String -> UserId -> String -> m ()
 addOwner aid uid key = do
   liftIO $ print (aid, uid, key)
   checkPrimaryOwner aid uid
   newOwner <- getResource selectOwnerByKey key
   when (newOwner == aid) $ throwM (OtherException "cant add self")
-  oid <- getTid
+  oid <- OwnerUserId <$> getTid
   let ou = OwnerUser
         { id = oid
         , userId = uid
@@ -59,7 +60,7 @@ addOwner aid uid key = do
   pure ()
 
 deleteOwner ::
-  MonadService m => String -> ResourceId -> m ()
+  MonadService m => String -> OwnerUserId -> m ()
 deleteOwner aid ouid = do
   ou <- getResource selectOwnerUser ouid
   checkPrimaryOwner aid (ou ^. #userId)
@@ -74,7 +75,7 @@ setOwnerPushToken aid token = runTransactionM $ do
       keyUpdateM updateOwnerToken ot'
       pure ot'
     Nothing -> do
-      tid <- getTid
+      tid <- OwnerTokenId <$> getTid
       let ot = OwnerToken
             { id = tid
             , ownerId = aid

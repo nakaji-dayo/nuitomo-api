@@ -12,29 +12,30 @@ module Service.Loader
 import           Data.Map    (Map)
 import           EagerLoader
 import           Entity
+import           EntityId
 import           Query
 import           Type
 
-type UserMap = Map ResourceId User
-type UserImagesMap = Map ResourceId [UserImage]
-type PostImagesMap = Map ResourceId [PostImage]
-type PostPostsMap = Map (ResourceId) [Post]
-type PostLikesMap = Map ResourceId [Like]
+type UserMap = Map UserId User
+type UserImagesMap = Map UserId [UserImage]
+type PostImagesMap = Map PostId [PostImage]
+type PostPostsMap = Map PostId [Post]
+type PostLikesMap = Map PostId [Like]
 
 -- loadTags :: ListLoader ResourceId TaskTag
 -- loadTags = loadList includeTags
 
-loadUserImages :: ListLoader ResourceId UserImage
+loadUserImages :: ListLoader UserId UserImage
 loadUserImages = loadList includeUserImages
 
-loadPostImages :: ListLoader ResourceId PostImage
+loadPostImages :: ListLoader PostId PostImage
 loadPostImages = loadList includePostImages
 
-loadUser :: Loader ResourceId User
+loadUser :: Loader UserId User
 loadUser = load (include Entity.user)
 
-loadPostReplies :: ListLoader ResourceId Post
+loadPostReplies :: ListLoader PostId Post
 loadPostReplies  = loadList' includePostReplies
 
-loadPostLikes :: String -> ListLoader ResourceId Like
+loadPostLikes :: String -> ListLoader PostId Like
 loadPostLikes aid = loadList (includePostLikes aid)
