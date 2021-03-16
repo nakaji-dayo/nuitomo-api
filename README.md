@@ -89,23 +89,3 @@ stack exec -- nuitomo-api-swagger ui
 ```
 stack exec -- nuitomo-api-swagger
 ```
-
-## template
-
-### use this project as stack template
-
-```
-stack new my-project https://raw.githubusercontent.com/lemois/nuitomo-api/templates/nuitomo-api.hsfiles
-cd my-project
-chmod +x scripts/*
-```
--- TODO: private projectにしている間はこの手順では無理。localに保存して実行。
-
-### update hsfiles
-
-```
-./scripts/makeTemplate.sh
-git checkout templates
-mv nuitomo-api.hsfiles-tmp nuitomo-api.hsfiles
-# commit
-```

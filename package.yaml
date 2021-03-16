@@ -1,0 +1,141 @@
+name: nuitomo-api
+version: '0.1.0.0'
+category: Web
+author: Author name here
+maintainer: example@example.com
+copyright: 2018 Author name here
+github: githubuser/nuitomo-api
+extra-source-files:
+- README.md
+dependencies:
+- base >=4.7 && <5
+- aeson
+- containers
+- data-default-class
+- lens
+- servant-server
+- text
+- katip
+- mtl
+- relational-query
+- monad-control
+- exceptions
+- transformers-base
+- time
+- extend-record-data-th
+
+library:
+  source-dirs: src
+  dependencies:
+  - casing
+  - HDBC
+  - HDBC-postgresql
+  - HDBC-session
+  - jose
+  - persistable-record
+  - relational-record
+  - relational-query-HDBC
+  - resource-pool
+  - servant
+  - servant-auth-server
+  - servant-multipart
+  - sql-words
+  - swagger2
+  - template-haskell
+  - th-printf
+  - wai
+  - warp
+  - wai-cors
+  - yaml
+  - type-level-sets == 0.8.9.0
+  - product-isomorphic
+  - utf8-string
+  - scientific
+  - githash
+  - th-printf
+  - bytestring
+  - QuickCheck
+  - quickcheck-arbitrary-adt
+  - stm
+  - http-conduit
+  - generic-lens
+  - pretty-simple
+  - http-types
+  - servant-swagger-tags
+  - x509
+  - pem
+  - servant-swagger
+  - network-uri
+  - http-client
+  - word8
+  - unordered-containers
+  - base58-bytestring
+  - random-bytestring
+  - random
+
+executables:
+  nuitomo-api:
+    main: Main.hs
+    source-dirs: app/api
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - nuitomo-api
+    - cron
+  nuitomo-api-batch:
+    main: Main.hs
+    source-dirs: app/batch
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - nuitomo-api
+  nuitomo-api-mock:
+    main: Main.hs
+    source-dirs: app/mock
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - nuitomo-api
+    - wai
+    - warp
+    - servant-mock
+  nuitomo-api-swagger:
+    main: Main.hs
+    source-dirs: app/swagger
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - nuitomo-api
+    - warp
+    - swagger2
+    - servant-swagger
+    - servant-swagger-ui
+    - bytestring
+    - servant-auth-swagger
+    - servant-auth-server
+
+tests:
+  nuitomo-api-test:
+    main: Main.hs
+    source-dirs: test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - nuitomo-api
+    - hspec
+    - monad-mock
+    - doctest
