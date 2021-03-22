@@ -11,6 +11,8 @@ import           App
 import qualified Data.Map                           as M
 import           Data.Maybe
 import           Data.Type.Map                      as TM
+import           Database.Record                    (HasColumnConstraint,
+                                                     NotNull)
 import           Database.Relational.Monad.BaseType (Relation)
 import           Util
 
@@ -21,6 +23,8 @@ type TMap = M.Map
 f ->> g = f >>= \(_, b) -> g b
 
 -- (->>=) :: Monad m => m (a, b) -> (a -> b -> m b1) -> m b1
+
+(->>=) :: Monad m => (m (a, b) -> (a -> b -> m b1) -> m b1)
 (->>=) f g = f >>= uncurry g
 
 load ::
@@ -46,6 +50,11 @@ loadList query key ids m = do
   rs <- queryM (relationalQuery' (query ids) []) ()
   return (snd <$> rs, Ext key (createMapWithListValue rs) m)
 
+loadList' :: (MonadService m, HasColumnConstraint NotNull a, FromSql SqlValue a, FromSql SqlValue b, Ord a) => (t -> Relation () (Maybe a, b))
+                  -> Var k
+                  -> t
+                  -> Map c
+                  -> m ([b], Map ((k ':-> M.Map a [b]) : c))
 loadList' query key ids m = do
   rs <- fmap (mapFst fromJust) <$> queryM (relationalQuery' (query ids) []) ()
   return (snd <$> rs, Ext key (createMapWithListValue rs) m)

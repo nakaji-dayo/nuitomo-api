@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric         #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedStrings     #-}
 module Network.Expo.Client
@@ -9,18 +8,18 @@ module Network.Expo.Client
 import           Control.Monad.Catch    (MonadThrow)
 import           Control.Monad.IO.Class (MonadIO)
 import           Data.Aeson
-import qualified Data.ByteString.Char8  as B8
 import           Data.Function
 import           Network.Expo.Type
 import           Network.HTTP.Simple
 
+sendApiEndpoint :: String
 sendApiEndpoint = "POST https://exp.host/--/api/v2/push/send"
 
 send :: SendRequest -> IO SendResponse
-send b = request b
+send = request
 
 batchSend :: [SendRequest] -> IO BatchSendResponse
-batchSend b = request b
+batchSend = request
 
 request ::
   (MonadThrow m,

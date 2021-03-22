@@ -1,6 +1,7 @@
 DBURL="postgres://api:passwd@localhost:5432/nuitomo-api?sslmode=disable"
-DEFAULT_BUILD_OPTS="-j -Wall -Werror"
-FAST_BUILD_OPTS="-j -Wall"
+W_OPT=-Wno-name-shadowing -Wno-name-shadowing -Wno-unused-do-bind
+DEFAULT_BUILD_OPTS="-j -Wall -Werror ${W_OPT}"
+FAST_BUILD_OPTS="-j -Wall -Werror ${W_OPT}"
 
 OPTIMIZED_BUILD_OPTS="-j -Wall -O1"
 
@@ -33,11 +34,11 @@ clean:
 # repl
 .PHONY: ghci
 ghci:
-	stack ghci --ghc-options="-j" --ghc-options="-Wall" nuitomo-api:lib
+	stack ghci --ghc-options="-j" --ghc-options=$(FAST_BUILD_OPTS) nuitomo-api:lib
 
 .PHONY: ghci-test
 ghci-test:
-	stack ghci --ghc-options="-j" --ghc-options="-Wall" nuitomo-api:lib nuitomo-api:test:nuitomo-api-test
+	stack ghci --ghc-options="-j" --ghc-options=$(FAST_BUILD_OPTS) nuitomo-api:lib nuitomo-api:test:nuitomo-api-test
 
 # migrate postgresql database
 .PHONY: migrate-up

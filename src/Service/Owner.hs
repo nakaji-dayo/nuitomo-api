@@ -18,6 +18,7 @@ import           Service.Exception
 import           Service.Util
 import           Type
 
+getOwnerKey :: MonadService m => String -> m String
 getOwnerKey aid = do
   o <- selectOneM Q.selectOwnerKey aid
   case o of

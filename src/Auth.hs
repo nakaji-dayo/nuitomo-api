@@ -1,6 +1,5 @@
 module Auth
-  ( module Auth
-  , AccountId (..)
+  ( AccountId (..)
   ) where
 
 -- import           Control.Lens
@@ -14,7 +13,7 @@ module Auth
 import           Servant.Auth.Firebase (AccountId (..))
 -- import           Servant.Auth.Server
 -- import           Type
-import           Data.Text             (unpack)
+-- import           Data.Text             (unpack)
 
 -- data AuthType = User | Guest
 --   deriving (Show, Generic, Read, Enum)

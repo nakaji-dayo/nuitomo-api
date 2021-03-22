@@ -17,7 +17,6 @@ import           Entity                                   as E
 import           Entity.Post                              as Post
 import           EntityId
 import           Query.Util
-import           Type                                     as T
 
 -- selectUser' :: Query Int64 User
 -- selectUser' = relationalQuery' r []
@@ -121,7 +120,7 @@ selectFollowers maid =  q' $ \ph -> do
   u <- query E.user
   f <- query follow
   on $ u ! #id .=. f ! #userId
-  forM maid $ \aid -> do
+  forM_ maid $ \aid -> do
     ou <- query ownerUser
     on $ ou ! #userId .=. u ! #id
     wheres $ ou ! #ownerId .=. value aid
@@ -166,7 +165,7 @@ selectPosts uids mcursor = relationalQuery' (relation r) (limit' 40)
       wheres $ p ! #userId `in'` values' uids
         `or'` (p ! #mentionTo `in'` values'' (Just <$> uids) `and'` p ! #aggReplyCount .>. value 0)
       wheres $ isNothing (p ! #replyTo)
-      forM mcursor $ \cursor -> do
+      forM_ mcursor $ \cursor -> do
         wheres $ p ! #id .<. value cursor
       desc $ p ! #id
       pure p
@@ -192,7 +191,7 @@ selectNotifications mcursor = relationalQuery' (relation' . placeholder $ r) (li
       mp <- queryMaybe post
       on $ mp ?! #id .=. n ! #refPostId
       wheres $ ou ! #ownerId .=. ph
-      forM mcursor $ \cursor -> do
+      forM_ mcursor $ \cursor -> do
         wheres $ n ! #id .<. value cursor
       desc $ n ! #id
       return $ (,,,) |$| n |*| u |*| mpu |*| mp

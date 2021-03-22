@@ -52,7 +52,7 @@ sendPushNotification uid ty = do
     pure ()
   pure ()
 
-
+pushBody :: NotificationType -> [Char] -> [Char]
 pushBody NotifyReply n   = n <> "に返信が届いています"
 pushBody NotifyFollow n  = n <> "をフォローしたユーザーがいます"
 pushBody NotifyLike n    = n <> "の投稿が「いいね」されました"

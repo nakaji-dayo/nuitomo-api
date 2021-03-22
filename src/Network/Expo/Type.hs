@@ -6,6 +6,7 @@ module Network.Expo.Type where
 import           Data.Aeson
 import           GHC.Generics
 
+customOptions :: Options
 customOptions = defaultOptions
   { fieldLabelModifier = escape
   , omitNothingFields = True
@@ -35,6 +36,7 @@ instance ToJSON SendRequest where
   toJSON     = genericToJSON customOptions
   toEncoding = genericToEncoding customOptions
 
+sendRequest :: String -> SendRequest
 sendRequest to = SendRequest
   { to         = to
   , _data      = Nothing

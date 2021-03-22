@@ -14,7 +14,6 @@ import           EagerLoader
 import           Entity
 import           EntityId
 import           Query
-import           Type
 
 type UserMap = Map UserId User
 type UserImagesMap = Map UserId [UserImage]
